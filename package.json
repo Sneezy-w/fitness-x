@@ -1,0 +1,13 @@
+{
+  "name": "fitness-x",
+  "private": true,
+  "scripts": {
+    "start": "pnpm run --parallel start:backend start:client start:admin",
+    "start:backend": "pnpm run --filter backend start",
+    "start:client": "pnpm run --filter client-portal dev",
+    "start:admin": "pnpm run --filter admin-portal dev",
+    "build": "pnpm run --recursive build",
+    "test": "pnpm run --recursive test"
+  },
+  "devDependencies": {}
+} 
