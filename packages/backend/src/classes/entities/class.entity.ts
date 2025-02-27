@@ -26,16 +26,12 @@ export class Class {
   @ApiProperty({ description: 'Description of the class', type: String })
   description: string;
 
-  @Column()
-  @ApiProperty({
-    description: 'Duration of the class in minutes',
-    type: Number,
-  })
-  duration: number;
-
-  @Column()
-  @ApiProperty({ description: 'Maximum capacity of the class', type: Number })
-  capacity: number;
+  // @Column()
+  // @ApiProperty({
+  //   description: 'Duration of the class in minutes',
+  //   type: Number,
+  // })
+  // duration: number;
 
   @Column({ default: true })
   @ApiProperty({ description: 'Whether the class is active', type: Boolean })

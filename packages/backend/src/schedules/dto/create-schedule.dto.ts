@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsDateString, IsBoolean } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsDateString,
+  IsBoolean,
+  Matches,
+  Min,
+} from 'class-validator';
 
 export class CreateScheduleDto {
   @ApiProperty({
@@ -21,20 +28,26 @@ export class CreateScheduleDto {
   trainer_id: number;
 
   @ApiProperty({
-    description: 'Start time of the class',
-    example: '2023-07-15T10:00:00.000Z',
-    type: String,
+    description: 'The date of the schedule (YYYY-MM-DD)',
+    example: '2023-07-15',
   })
   @IsDateString()
+  @IsNotEmpty()
+  date: string;
+
+  @ApiProperty({
+    description: 'Start time (HH:mm)',
+    example: '10:00',
+  })
+  @Matches(/^([01]\d|2[0-3]):[0-5]\d$/)
   @IsNotEmpty()
   start_time: string;
 
   @ApiProperty({
-    description: 'End time of the class',
-    example: '2023-07-15T11:00:00.000Z',
-    type: String,
+    description: 'End time (HH:mm)',
+    example: '11:00',
   })
-  @IsDateString()
+  @Matches(/^([01]\d|2[0-3]):[0-5]\d$/)
   @IsNotEmpty()
   end_time: string;
 
@@ -46,4 +59,14 @@ export class CreateScheduleDto {
   })
   @IsBoolean()
   is_cancelled?: boolean = false;
+
+  @ApiProperty({
+    description: 'Maximum capacity of the class',
+    example: 20,
+    type: Number,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  @Min(1)
+  capacity: number;
 }

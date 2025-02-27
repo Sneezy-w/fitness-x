@@ -19,10 +19,12 @@ import {
 import { MembershipTypesService } from './membership-types.service';
 import { CreateMembershipTypeDto } from './dto/create-membership-type.dto';
 import { UpdateMembershipTypeDto } from './dto/update-membership-type.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+//import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../auth/enums/role.enum';
+import { Auth0AuthGuard } from 'src/auth/guards/auth0-auth.guard';
+import { Public } from 'src/auth/decorators/public.decorator';
 
 @ApiTags('membership-types')
 @Controller('membership-types')
@@ -32,12 +34,12 @@ export class MembershipTypesController {
   ) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(Auth0AuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new membership type (admin only)' })
   @ApiResponse({
-    status: 201,
+    status: 200,
     description: 'Membership type successfully created',
   })
   @ApiResponse({ status: 400, description: 'Bad request' })
@@ -50,6 +52,9 @@ export class MembershipTypesController {
   }
 
   @Get()
+  // @UseGuards(Auth0AuthGuard, RolesGuard)
+  // @Roles(Role.ADMIN)
+  @Public()
   @ApiOperation({ summary: 'Get all active membership types' })
   @ApiResponse({ status: 200, description: 'List of active membership types' })
   findAll() {
@@ -57,7 +62,7 @@ export class MembershipTypesController {
   }
 
   @Get('all')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(Auth0AuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({
@@ -69,6 +74,7 @@ export class MembershipTypesController {
   }
 
   @Get(':id')
+  @Public()
   @ApiOperation({ summary: 'Get a membership type by ID' })
   @ApiResponse({ status: 200, description: 'Membership type details' })
   @ApiResponse({ status: 404, description: 'Membership type not found' })
@@ -77,7 +83,7 @@ export class MembershipTypesController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(Auth0AuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a membership type (admin only)' })
@@ -99,7 +105,7 @@ export class MembershipTypesController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(Auth0AuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -114,7 +120,7 @@ export class MembershipTypesController {
   }
 
   @Patch(':id/restore')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(Auth0AuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Restore a deleted membership type (admin only)' })

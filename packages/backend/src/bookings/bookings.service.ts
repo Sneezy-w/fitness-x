@@ -42,7 +42,7 @@ export class BookingsService {
     }
 
     // Check if the schedule date is in the past
-    if (new Date() > schedule.start_time) {
+    if (new Date() > new Date(`${schedule.date}T${schedule.start_time}`)) {
       throw new BadRequestException(
         'Cannot book a class that has already started',
       );
@@ -52,7 +52,7 @@ export class BookingsService {
     const bookingsCount = await this.bookingRepository.count({
       where: { schedule_id: schedule.id },
     });
-    if (bookingsCount >= schedule.class.capacity) {
+    if (bookingsCount >= schedule.capacity) {
       throw new BadRequestException('This class is already full');
     }
 
@@ -195,7 +195,7 @@ export class BookingsService {
           id: Not(id),
         },
       });
-      if (bookingsCount >= schedule.class.capacity) {
+      if (bookingsCount >= schedule.capacity) {
         throw new BadRequestException('This class is already full');
       }
 
@@ -230,7 +230,9 @@ export class BookingsService {
 
     // Check if the class has already started or ended
     const now = new Date();
-    if (now > booking.schedule.start_time) {
+    if (
+      now > new Date(`${booking.schedule.date}T${booking.schedule.start_time}`)
+    ) {
       throw new BadRequestException(
         'Cannot cancel a booking for a class that has already started',
       );

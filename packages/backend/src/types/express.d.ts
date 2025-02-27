@@ -1,7 +1,7 @@
 import { Role } from '../auth/enums/role.enum';
 
 export interface User {
-  id: string;
+  id: number;
   email: string;
   role: Role.MEMBER | Role.TRAINER;
 }

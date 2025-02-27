@@ -19,18 +19,18 @@ import {
 import { ClassesService } from './classes.service';
 import { CreateClassDto } from './dto/create-class.dto';
 import { UpdateClassDto } from './dto/update-class.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+//import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../auth/enums/role.enum';
-
+import { Auth0AuthGuard } from 'src/auth/guards/auth0-auth.guard';
 @ApiTags('classes')
 @Controller('classes')
 export class ClassesController {
   constructor(private readonly classesService: ClassesService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(Auth0AuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new class (admin only)' })
@@ -48,7 +48,7 @@ export class ClassesController {
   }
 
   @Get('all')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(Auth0AuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({
@@ -68,7 +68,7 @@ export class ClassesController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(Auth0AuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a class (admin only)' })
@@ -79,7 +79,7 @@ export class ClassesController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(Auth0AuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -91,7 +91,7 @@ export class ClassesController {
   }
 
   @Patch(':id/deactivate')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(Auth0AuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Deactivate a class (admin only)' })
@@ -102,7 +102,7 @@ export class ClassesController {
   }
 
   @Patch(':id/activate')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(Auth0AuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Activate a class (admin only)' })

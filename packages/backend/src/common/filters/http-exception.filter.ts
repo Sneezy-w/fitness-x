@@ -3,9 +3,12 @@ import {
   Catch,
   ArgumentsHost,
   HttpException,
+  BadRequestException,
 } from '@nestjs/common';
+import { ErrorShowType } from '../enums/error-show-type.enum';
 import { Response } from 'express';
 import { ApiException } from '../exceptions/api.exception';
+//import { ValidationError } from 'class-validator';
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -15,24 +18,49 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus();
     const exceptionResponse = exception.getResponse();
 
+    console.error(exception);
+
     if (exception instanceof ApiException) {
-      response.status(status).json({
+      return response.status(status).json({
         success: false,
         data: null,
         errorCode: exception.getErrorCode(),
         errorMessage: exception.getResponse(),
         showType: exception.getShowType(),
       });
-    } else {
-      response.status(status).json({
+    }
+
+    if (exception instanceof BadRequestException) {
+      let errorMessages: string[] = [];
+      const responseData = exception.getResponse();
+      if (typeof responseData === 'string') {
+        errorMessages = [responseData];
+      } else {
+        const { message } = responseData as { message?: string | string[] };
+        if (Array.isArray(message)) {
+          errorMessages = message.map((item) => item.toString());
+        } else {
+          errorMessages = [message?.toString() ?? 'An error occurred'];
+        }
+      }
+      //const errorMessages = exception.getResponse()?.message as string[];
+      return response.status(status).json({
         success: false,
         data: null,
-        errorCode: status,
-        errorMessage:
-          typeof exceptionResponse === 'string'
-            ? exceptionResponse
-            : 'An error occurred',
+        errorCode: 12000,
+        errorMessage: errorMessages.join(', ') || 'An error occurred',
+        showType: ErrorShowType.ERROR_MESSAGE,
       });
     }
+
+    response.status(status).json({
+      success: false,
+      data: null,
+      errorCode: status,
+      errorMessage:
+        typeof exceptionResponse === 'string'
+          ? exceptionResponse
+          : 'An error occurred',
+    });
   }
 }

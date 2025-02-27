@@ -1,12 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsNotEmpty,
-  IsNumber,
-  IsString,
-  IsBoolean,
-  Min,
-  MaxLength,
-} from 'class-validator';
+import { IsNotEmpty, IsString, IsBoolean, MaxLength } from 'class-validator';
 
 export class CreateClassDto {
   @ApiProperty({
@@ -28,25 +21,25 @@ export class CreateClassDto {
   @IsString()
   description: string;
 
-  @ApiProperty({
-    description: 'Duration of the class in minutes',
-    example: 60,
-    type: Number,
-  })
-  @IsNotEmpty()
-  @IsNumber()
-  @Min(1)
-  duration: number;
+  // @ApiProperty({
+  //   description: 'Duration of the class in minutes',
+  //   example: 60,
+  //   type: Number,
+  // })
+  // @IsNotEmpty()
+  // @IsNumber()
+  // @Min(1)
+  // duration: number;
 
-  @ApiProperty({
-    description: 'Maximum capacity of the class',
-    example: 20,
-    type: Number,
-  })
-  @IsNotEmpty()
-  @IsNumber()
-  @Min(1)
-  capacity: number;
+  // @ApiProperty({
+  //   description: 'Maximum capacity of the class',
+  //   example: 20,
+  //   type: Number,
+  // })
+  // @IsNotEmpty()
+  // @IsNumber()
+  // @Min(1)
+  // capacity: number;
 
   @ApiProperty({
     description: 'Whether the class is active',

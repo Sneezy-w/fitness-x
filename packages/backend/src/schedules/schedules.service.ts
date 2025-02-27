@@ -32,20 +32,29 @@ export class SchedulesService {
       throw new BadRequestException('Trainer is not approved');
     }
 
-    // Convert string dates to Date objects
-    const startTime = new Date(createScheduleDto.start_time);
-    const endTime = new Date(createScheduleDto.end_time);
+    // Validate time format
+    const start = new Date(
+      `${createScheduleDto.date}T${createScheduleDto.start_time}`,
+    );
+    const end = new Date(
+      `${createScheduleDto.date}T${createScheduleDto.end_time}`,
+    );
 
-    // Validate that end time is after start time
-    if (endTime <= startTime) {
+    if (end <= start) {
       throw new BadRequestException('End time must be after start time');
+    }
+
+    // Check if the schedule is on the same day
+    if (start.toDateString() !== end.toDateString()) {
+      throw new BadRequestException('Schedule must be on the same day');
     }
 
     // Check for overlapping schedules for the trainer
     const trainerSchedules = await this.findOverlappingTrainerSchedules(
       trainer.id,
-      startTime,
-      endTime,
+      createScheduleDto.date,
+      createScheduleDto.start_time,
+      createScheduleDto.end_time,
     );
     if (trainerSchedules.length > 0) {
       throw new BadRequestException(
@@ -56,8 +65,9 @@ export class SchedulesService {
     // Create the schedule
     const schedule = this.scheduleRepository.create({
       ...createScheduleDto,
-      start_time: startTime,
-      end_time: endTime,
+      date: createScheduleDto.date,
+      start_time: createScheduleDto.start_time,
+      end_time: createScheduleDto.end_time,
     });
 
     return this.scheduleRepository.save(schedule);
@@ -74,7 +84,8 @@ export class SchedulesService {
     const now = new Date();
     return this.scheduleRepository.find({
       where: {
-        start_time: MoreThanOrEqual(now),
+        date: MoreThanOrEqual(now.toISOString().split('T')[0]),
+        //start_time: MoreThanOrEqual(now),
         is_cancelled: false,
       },
       relations: ['class', 'trainer'],
@@ -85,7 +96,10 @@ export class SchedulesService {
   async findByDateRange(startDate: Date, endDate: Date): Promise<Schedule[]> {
     return this.scheduleRepository.find({
       where: {
-        start_time: Between(startDate, endDate),
+        date: Between(
+          startDate.toISOString().split('T')[0],
+          endDate.toISOString().split('T')[0],
+        ),
         is_cancelled: false,
       },
       relations: ['class', 'trainer'],
@@ -146,18 +160,18 @@ export class SchedulesService {
     // Update the schedule with the provided data
     Object.assign(schedule, updateScheduleDto);
 
-    // If dates are being updated, convert them to Date objects
-    if (updateScheduleDto.start_time) {
-      schedule.start_time = new Date(updateScheduleDto.start_time);
-    }
+    // No need to convert to Date objects since we're storing as string/time types
+    if (updateScheduleDto.start_time && updateScheduleDto.end_time) {
+      const startDate = new Date(
+        `${schedule.date}T${updateScheduleDto.start_time}`,
+      );
+      const endDate = new Date(
+        `${schedule.date}T${updateScheduleDto.end_time}`,
+      );
 
-    if (updateScheduleDto.end_time) {
-      schedule.end_time = new Date(updateScheduleDto.end_time);
-    }
-
-    // Validate that end time is after start time
-    if (schedule.end_time <= schedule.start_time) {
-      throw new BadRequestException('End time must be after start time');
+      if (endDate <= startDate) {
+        throw new BadRequestException('End time must be after start time');
+      }
     }
 
     // Check for overlapping schedules for the trainer if trainer or time changes
@@ -169,6 +183,7 @@ export class SchedulesService {
       const trainerId = updateScheduleDto.trainer_id || schedule.trainer_id;
       const trainerSchedules = await this.findOverlappingTrainerSchedules(
         trainerId,
+        schedule.date,
         schedule.start_time,
         schedule.end_time,
         id,
@@ -200,14 +215,16 @@ export class SchedulesService {
 
   private async findOverlappingTrainerSchedules(
     trainerId: number,
-    startTime: Date,
-    endTime: Date,
+    date: string,
+    startTime: string,
+    endTime: string,
     excludeScheduleId?: number,
   ): Promise<Schedule[]> {
     const query = this.scheduleRepository
       .createQueryBuilder('schedule')
       .where('schedule.trainer_id = :trainerId', { trainerId })
       .andWhere('schedule.is_cancelled = false')
+      .andWhere('schedule.date = :date', { date })
       .andWhere(
         '(schedule.start_time < :endTime AND schedule.end_time > :startTime)',
         { startTime, endTime },

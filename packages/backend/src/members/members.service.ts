@@ -42,7 +42,17 @@ export class MembersService {
   }
 
   async findAll(): Promise<Member[]> {
-    return this.membersRepository.find();
+    const members = await this.membersRepository
+      .createQueryBuilder('member')
+      .leftJoinAndSelect(
+        'member.subscriptions',
+        'subscription',
+        'subscription.end_date >= :now AND subscription.start_date <= :now',
+        { now: new Date() },
+      )
+      .getMany();
+
+    return members;
   }
 
   async findOne(id: number): Promise<Member> {

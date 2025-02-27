@@ -43,7 +43,9 @@ export class MembershipTypesService {
   }
 
   async findAllIncludingDeleted(): Promise<MembershipType[]> {
-    return this.membershipTypeRepository.find();
+    const membershipTypes = await this.membershipTypeRepository.find();
+    //console.log(membershipTypes);
+    return membershipTypes;
   }
 
   async findOne(id: number): Promise<MembershipType> {

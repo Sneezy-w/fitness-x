@@ -16,7 +16,8 @@
     "antd": "^5.4.0",
     "antd-style": "^3.7.1",
     "auth0-js": "^9.28.0",
-    "classnames": "^2.5.1"
+    "classnames": "^2.5.1",
+    "dayjs": "^1.11.13"
   },
   "devDependencies": {
     "@types/auth0-js": "^9.21.6",

@@ -9,6 +9,8 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Req,
+  ForbiddenException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -23,6 +25,9 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../auth/enums/role.enum';
+import { Auth0AuthGuard } from 'src/auth/guards/auth0-auth.guard';
+import { Request } from 'express';
+import { User } from 'src/types/express';
 
 @ApiTags('trainers')
 @Controller('trainers')
@@ -39,7 +44,7 @@ export class TrainersController {
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(Auth0AuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all trainers (admin only)' })
@@ -59,8 +64,8 @@ export class TrainersController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.TRAINER)
+  @UseGuards(Auth0AuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a trainer' })
   @ApiResponse({ status: 200, description: 'Trainer updated successfully' })
@@ -70,8 +75,30 @@ export class TrainersController {
     return this.trainersService.update(+id, updateTrainerDto);
   }
 
-  @Patch(':id/approve')
+  @Patch(':id/profile')
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.TRAINER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update a trainer' })
+  @ApiResponse({ status: 200, description: 'Trainer updated successfully' })
+  @ApiResponse({ status: 404, description: 'Trainer not found' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  updateProfile(
+    @Param('id') id: string,
+    @Body() updateTrainerDto: UpdateTrainerDto,
+    @Req() req: Request,
+  ) {
+    const currentTrainer = req.user as User;
+    if (currentTrainer?.id !== +id) {
+      throw new ForbiddenException(
+        'You are not authorized to update this trainer',
+      );
+    }
+    return this.trainersService.update(+id, updateTrainerDto);
+  }
+
+  @Patch(':id/approve')
+  @UseGuards(Auth0AuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Approve a trainer (admin only)' })
@@ -82,7 +109,7 @@ export class TrainersController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(Auth0AuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)

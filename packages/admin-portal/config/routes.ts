@@ -32,6 +32,38 @@ export default [
     component: './Members',
   },
   {
+    name: 'Membership Types',
+    path: '/membership-types',
+    component: './MembershipTypes',
+  },
+  // {
+  //   name: 'Membership Subscriptions',
+  //   path: '/membership-subscriptions',
+  //   component: './MembershipSubscriptions',
+  // },
+
+  {
+    name: 'Trainers',
+    path: '/trainers',
+    component: './Trainers',
+  },
+
+  {
+    name: 'Classes',
+    path: '/classes',
+    component: './Classes',
+  },
+  {
+    name: 'Schedules',
+    path: '/schedules',
+    component: './Schedules',
+  },
+  // {
+  //   name: 'Bookings',
+  //   path: '/bookings',
+  //   component: './Bookings',
+  // },
+  {
     name: 'Access',
     path: '/access',
     component: './Access',
