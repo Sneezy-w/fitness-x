@@ -5,10 +5,11 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
+  //Delete,
   UseGuards,
   HttpCode,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -20,6 +21,7 @@ import { MembersService } from './members.service';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Auth0AuthGuard } from '../auth/guards/auth0-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../auth/enums/role.enum';
@@ -39,7 +41,7 @@ export class MembersController {
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(Auth0AuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all members (admin only)' })
@@ -54,7 +56,9 @@ export class MembersController {
   @ApiOperation({ summary: 'Get a member by ID' })
   @ApiResponse({ status: 200, description: 'Member details' })
   @ApiResponse({ status: 404, description: 'Member not found' })
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: string, @Req() request: Express.Request) {
+    //console.log('id', id);
+    console.log('user', request.user);
     return this.membersService.findOne(+id);
   }
 
@@ -69,15 +73,27 @@ export class MembersController {
     return this.membersService.update(+id, updateMemberDto);
   }
 
-  @Delete(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Patch(':id/deactivate')
+  @UseGuards(Auth0AuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Deactivate a member (admin only)' })
-  @ApiResponse({ status: 204, description: 'Member deactivated successfully' })
+  @ApiResponse({ status: 200, description: 'Member deactivated successfully' })
   @ApiResponse({ status: 404, description: 'Member not found' })
-  remove(@Param('id') id: string) {
-    return this.membersService.remove(+id);
+  deactivate(@Param('id') id: string) {
+    return this.membersService.deactivate(+id);
+  }
+
+  @Patch(':id/activate')
+  @UseGuards(Auth0AuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Activate a member (admin only)' })
+  @ApiResponse({ status: 200, description: 'Member activated successfully' })
+  @ApiResponse({ status: 404, description: 'Member not found' })
+  activate(@Param('id') id: string) {
+    return this.membersService.activate(+id);
   }
 }

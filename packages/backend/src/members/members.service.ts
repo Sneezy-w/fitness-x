@@ -86,9 +86,19 @@ export class MembersService {
     return this.membersRepository.save(member);
   }
 
-  async remove(id: number): Promise<void> {
+  async deactivate(id: number): Promise<void> {
     const result = await this.membersRepository.update(id, {
       is_active: false,
+    });
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`Member with ID ${id} not found`);
+    }
+  }
+
+  async activate(id: number): Promise<void> {
+    const result = await this.membersRepository.update(id, {
+      is_active: true,
     });
 
     if (result.affected === 0) {

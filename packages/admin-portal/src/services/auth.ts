@@ -7,6 +7,7 @@ export const webAuth = new auth0.WebAuth({
   redirectUri: `${window.location.origin}/callback`,
   responseType: 'token id_token',
   scope: 'openid profile email',
+  audience: process.env.AUTH0_AUDIENCE || '',
 });
 
 export const auth = {

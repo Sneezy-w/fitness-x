@@ -27,6 +27,11 @@ export default [
     layout: false,
   },
   {
+    name: 'Members',
+    path: '/members',
+    component: './Members',
+  },
+  {
     name: 'Access',
     path: '/access',
     component: './Access',

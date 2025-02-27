@@ -98,4 +98,12 @@ declare namespace API {
     description?: string;
     type?: NoticeIconItemType;
   };
+
+  interface R<T> {
+    success?: boolean;
+    data?: T;
+    errorCode?: number;
+    errorMessage?: string;
+    showType?: ErrorShowType;
+  }
 }
