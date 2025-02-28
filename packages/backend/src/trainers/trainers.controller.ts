@@ -27,7 +27,6 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../auth/enums/role.enum';
 import { Auth0AuthGuard } from 'src/auth/guards/auth0-auth.guard';
 import { Request } from 'express';
-import { User } from 'src/types/express';
 
 @ApiTags('trainers')
 @Controller('trainers')
@@ -88,7 +87,7 @@ export class TrainersController {
     @Body() updateTrainerDto: UpdateTrainerDto,
     @Req() req: Request,
   ) {
-    const currentTrainer = req.user as User;
+    const currentTrainer = req.user as Express.MemberTrainerUser;
     if (currentTrainer?.id !== +id) {
       throw new ForbiddenException(
         'You are not authorized to update this trainer',

@@ -3,7 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { Role } from '../enums/role.enum';
-import { User } from 'src/types/express';
+//import { MemberTrainerUser } from 'src/types/express';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private configService: ConfigService) {
@@ -20,7 +20,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     sub: number;
     email: string;
     role: Role.MEMBER | Role.TRAINER;
-  }): User {
+  }): Express.MemberTrainerUser {
     return {
       id: payload.sub,
       email: payload.email,

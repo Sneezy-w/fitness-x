@@ -9,6 +9,8 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Req,
+  UnauthorizedException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -23,7 +25,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../auth/enums/role.enum';
-
+import { Request } from 'express';
 @ApiTags('bookings')
 @Controller('bookings')
 export class BookingsController {
@@ -50,7 +52,7 @@ export class BookingsController {
     return this.bookingsService.findAll();
   }
 
-  @Get('member/:memberId')
+  @Get(':memberId/member')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all bookings for a member' })
@@ -60,14 +62,32 @@ export class BookingsController {
     return this.bookingsService.findByMemberId(+memberId);
   }
 
-  @Get('member/:memberId/upcoming')
-  @UseGuards(JwtAuthGuard)
+  // @Get('member/upcoming/:memberId')
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles(Role.TRAINER)
+  // @ApiBearerAuth()
+  // @ApiOperation({ summary: 'Get upcoming bookings for a member' })
+  // @ApiResponse({ status: 200, description: 'List of upcoming member bookings' })
+  // @ApiResponse({ status: 404, description: 'Member not found' })
+  // findMemberUpcomingBookings(@Param('memberId') memberId: string) {
+  //   return this.bookingsService.findMemberUpcomingBookings(+memberId);
+  // }
+
+  @Get('member/upcoming')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.MEMBER)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get upcoming bookings for a member' })
   @ApiResponse({ status: 200, description: 'List of upcoming member bookings' })
   @ApiResponse({ status: 404, description: 'Member not found' })
-  findMemberUpcomingBookings(@Param('memberId') memberId: string) {
-    return this.bookingsService.findMemberUpcomingBookings(+memberId);
+  findMemberUpcomingBookingsByToken(@Req() request: Request) {
+    //console.log('request', request);
+    const currentUser = request.user as Express.MemberTrainerUser;
+    //console.log('currentUser', currentUser);
+    if (!currentUser) {
+      throw new UnauthorizedException('User not found');
+    }
+    return this.bookingsService.findMemberUpcomingBookings(currentUser.id);
   }
 
   @Get('schedule/:scheduleId')

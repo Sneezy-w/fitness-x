@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -21,7 +22,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../auth/enums/role.enum';
-
+import { Request } from 'express';
 @ApiTags('membership-subscriptions')
 @Controller('membership-subscriptions')
 export class MembershipSubscriptionsController {
@@ -59,24 +60,37 @@ export class MembershipSubscriptionsController {
     return this.subscriptionsService.findAll();
   }
 
-  @Get('member/:memberId')
+  @Get('member/getAll')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all subscriptions for a member' })
   @ApiResponse({ status: 200, description: 'List of member subscriptions' })
   @ApiResponse({ status: 404, description: 'Member not found' })
-  findByMemberId(@Param('memberId') memberId: string) {
-    return this.subscriptionsService.findByMemberId(+memberId);
+  findByMemberId(@Req() request: Request) {
+    const currentUser = request.user as Express.MemberTrainerUser;
+    return this.subscriptionsService.findByMemberId(currentUser.id);
   }
 
-  @Get('member/:memberId/current')
-  @UseGuards(JwtAuthGuard)
+  // @Get('member/:memberId/current')
+  // @UseGuards(JwtAuthGuard)
+  // @ApiBearerAuth()
+  // @ApiOperation({ summary: 'Get the current active subscription for a member' })
+  // @ApiResponse({ status: 200, description: 'Current subscription details' })
+  // @ApiResponse({ status: 404, description: 'No active subscription found' })
+  // findCurrentSubscription(@Param('memberId') memberId: string) {
+  //   return this.subscriptionsService.findCurrentSubscription(+memberId);
+  // }
+
+  @Get('member/current')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.MEMBER)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get the current active subscription for a member' })
   @ApiResponse({ status: 200, description: 'Current subscription details' })
   @ApiResponse({ status: 404, description: 'No active subscription found' })
-  findCurrentSubscription(@Param('memberId') memberId: string) {
-    return this.subscriptionsService.findCurrentSubscription(+memberId);
+  findCurrentSubscription(@Req() request: Request) {
+    const currentUser = request.user as Express.MemberTrainerUser;
+    return this.subscriptionsService.findCurrentSubscription(currentUser.id);
   }
 
   @Get(':id')

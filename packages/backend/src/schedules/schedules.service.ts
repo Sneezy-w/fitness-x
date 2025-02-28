@@ -88,7 +88,7 @@ export class SchedulesService {
         //start_time: MoreThanOrEqual(now),
         is_cancelled: false,
       },
-      relations: ['class', 'trainer'],
+      relations: ['class', 'trainer', 'bookings'],
       order: { start_time: 'ASC' },
     });
   }
