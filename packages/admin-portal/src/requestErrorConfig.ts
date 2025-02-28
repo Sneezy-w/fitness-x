@@ -3,7 +3,7 @@ import type { RequestConfig } from '@umijs/max';
 import { message, notification } from 'antd';
 import { auth } from './services/auth';
 
-// 错误处理方案： 错误类型
+// Error handling solution: Error types
 enum ErrorShowType {
   SILENT = 0,
   WARN_MESSAGE = 1,
@@ -11,7 +11,7 @@ enum ErrorShowType {
   NOTIFICATION = 3,
   REDIRECT = 9,
 }
-// 与后端约定的响应数据格式
+// Response data format agreed with the backend
 interface ResponseStructure {
   success: boolean;
   data: any;
@@ -28,14 +28,14 @@ async function calculateSha256(data: any): Promise<string> {
 }
 
 /**
- * @name 错误处理
- * pro 自带的错误处理， 可以在这里做自己的改动
- * @doc https://umijs.org/docs/max/request#配置
+ * @name Error handling
+ * Pro's built-in error handling, you can make your own changes here
+ * @doc https://umijs.org/docs/max/request#configuration
  */
 export const errorConfig: RequestConfig = {
-  // 错误处理： umi@3 的错误处理方案。
+  // Error handling: umi@3's error handling solution.
   errorConfig: {
-    // 错误抛出
+    // Error throwing
     errorThrower: (res) => {
       const { success, data, errorCode, errorMessage, showType } =
         res as unknown as ResponseStructure;
@@ -43,13 +43,13 @@ export const errorConfig: RequestConfig = {
         const error: any = new Error(errorMessage);
         error.name = 'BizError';
         error.info = { errorCode, errorMessage, showType, data };
-        throw error; // 抛出自制的错误
+        throw error; // Throw custom error
       }
     },
-    // 错误接收及处理
+    // Error receiving and handling
     errorHandler: (error: any, opts: any) => {
       if (opts?.skipErrorHandler) throw error;
-      // 我们的 errorThrower 抛出的错误。
+      // Errors thrown by our errorThrower.
       if (error.name === 'BizError') {
         const errorInfo: ResponseStructure | undefined = error.info;
         if (errorInfo) {
@@ -78,8 +78,6 @@ export const errorConfig: RequestConfig = {
           }
         }
       } else if (error.response) {
-        // Axios 的错误
-        // 请求成功发出且服务器也响应了状态码，但状态代码超出了 2xx 的范围
         // Axios's error
         // The request was successful and the server also responded with a status code, but the status code is out of the 2xx range
         //message.error(`Response status:${error.response.status}`);
@@ -128,22 +126,22 @@ export const errorConfig: RequestConfig = {
           }
         }
       } else if (error.request) {
-        // 请求已经成功发起，但没有收到响应
-        // \`error.request\` 在浏览器中是 XMLHttpRequest 的实例，
-        // 而在node.js中是 http.ClientRequest 的实例
+        // The request has been successfully initiated, but no response has been received
+        // `error.request` is an instance of XMLHttpRequest in the browser,
+        // and an instance of http.ClientRequest in node.js
         message.error('None response! Please retry.');
       } else {
         if (error.name === 'ReturnToLoginError') {
           auth.logout();
         } else {
-          // 发送请求时出了点问题
+          // Something went wrong when sending the request
           message.error('Request error, please retry.');
         }
       }
     },
   },
 
-  // 请求拦截器
+  // Request interceptor
   requestInterceptors: [
     async (config: RequestOptions) => {
       //console.log("requestInterceptor", config);
@@ -160,7 +158,7 @@ export const errorConfig: RequestConfig = {
         };
       }
 
-      // 拦截请求配置，进行个性化处理。
+      // Intercept request configuration for personalized processing.
       //const headers = config.headers;
       //const isToken = headers?.['isToken'];
       //if (isToken !== false) {
@@ -184,14 +182,14 @@ export const errorConfig: RequestConfig = {
     },
   ],
 
-  // 响应拦截器
+  // Response interceptor
   responseInterceptors: [
     (response) => {
-      // 拦截响应数据，进行个性化处理
+      // Intercept response data for personalized processing
       // const { data } = response as unknown as ResponseStructure;
 
       // if (data?.success === false) {
-      //   message.error('请求失败！');
+      //   message.error('Request failed!');
       // }
       return response;
     },

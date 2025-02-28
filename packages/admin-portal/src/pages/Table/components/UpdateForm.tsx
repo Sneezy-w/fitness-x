@@ -35,7 +35,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => (
           width={640}
           bodyStyle={{ padding: '32px 40px 48px' }}
           destroyOnClose
-          title="规则配置"
+          title="Rule Configuration"
           open={props.updateModalVisible}
           footer={submitter}
           onCancel={() => props.onCancel()}
@@ -51,21 +51,26 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => (
         name: props.values.name,
         nickName: props.values.nickName,
       }}
-      title="基本信息"
+      title="Basic Information"
     >
       <ProFormText
         width="md"
         name="name"
-        label="规则名称"
-        rules={[{ required: true, message: '请输入规则名称！' }]}
+        label="Rule Name"
+        rules={[{ required: true, message: 'Please enter rule name!' }]}
       />
       <ProFormTextArea
         name="desc"
         width="md"
-        label="规则描述"
-        placeholder="请输入至少五个字符"
+        label="Rule Description"
+        placeholder="Please enter at least five characters"
         rules={[
-          { required: true, message: '请输入至少五个字符的规则描述！', min: 5 },
+          {
+            required: true,
+            message:
+              'Please enter at least five characters for rule description!',
+            min: 5,
+          },
         ]}
       />
     </StepsForm.StepForm>
@@ -74,38 +79,38 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => (
         target: '0',
         template: '0',
       }}
-      title="配置规则属性"
+      title="Configure Rule Properties"
     >
       <ProFormSelect
         width="md"
         name="target"
-        label="监控对象"
+        label="Monitoring Object"
         valueEnum={{
-          0: '表一',
-          1: '表二',
+          0: 'Table 1',
+          1: 'Table 2',
         }}
       />
       <ProFormSelect
         width="md"
         name="template"
-        label="规则模板"
+        label="Rule Template"
         valueEnum={{
-          0: '规则模板一',
-          1: '规则模板二',
+          0: 'Rule Template 1',
+          1: 'Rule Template 2',
         }}
       />
       <ProFormRadio.Group
         name="type"
         width="md"
-        label="规则类型"
+        label="Rule Type"
         options={[
           {
             value: '0',
-            label: '强',
+            label: 'Strong',
           },
           {
             value: '1',
-            label: '弱',
+            label: 'Weak',
           },
         ]}
       />
@@ -115,20 +120,20 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => (
         type: '1',
         frequency: 'month',
       }}
-      title="设定调度周期"
+      title="Set Schedule Cycle"
     >
       <ProFormDateTimePicker
         name="time"
-        label="开始时间"
-        rules={[{ required: true, message: '请选择开始时间！' }]}
+        label="Start Time"
+        rules={[{ required: true, message: 'Please select start time!' }]}
       />
       <ProFormSelect
         name="frequency"
-        label="监控对象"
+        label="Frequency"
         width="xs"
         valueEnum={{
-          month: '月',
-          week: '周',
+          month: 'Month',
+          week: 'Week',
         }}
       />
     </StepsForm.StepForm>

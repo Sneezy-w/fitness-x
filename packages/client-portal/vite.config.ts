@@ -9,7 +9,7 @@ export default defineConfig({
       "/api": {
         target: "http://localhost:3000",
         changeOrigin: true,
-        // 如果后端API不是以/api开头，可以使用rewrite去掉/api前缀
+        // If the backend API doesn't start with /api, you can use rewrite to remove the /api prefix
         rewrite: (path) => path.replace(/^\/api/, ""),
       },
     },

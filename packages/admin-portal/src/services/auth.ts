@@ -1,6 +1,6 @@
 import auth0, { Auth0UserProfile } from 'auth0-js';
 
-// Auth0 配置
+// Auth0 Configuration
 export const webAuth = new auth0.WebAuth({
   domain: process.env.AUTH0_DOMAIN || '',
   clientID: process.env.AUTH0_CLIENT_ID || '',
@@ -15,7 +15,7 @@ export const auth = {
     return new Promise((resolve, reject) => {
       webAuth.login(
         {
-          realm: 'Username-Password-Authentication', // 指定 auth0 数据库连接
+          realm: 'Username-Password-Authentication', // Specify auth0 database connection
           username,
           password,
         },
@@ -31,12 +31,12 @@ export const auth = {
   },
 
   logout() {
-    // 清除本地存储的 token
+    // Clear locally stored tokens
     localStorage.removeItem('access_token');
     localStorage.removeItem('id_token');
     localStorage.removeItem('expires_at');
 
-    // 重定向到 Auth0 登出页面
+    // Redirect to Auth0 logout page
     webAuth.logout({
       returnTo: window.location.origin + '/login',
     });
@@ -58,7 +58,7 @@ export const auth = {
   },
 
   setSession(authResult: auth0.Auth0DecodedHash) {
-    // 设置 token 过期时间
+    // Set token expiration time
     const expiresAt = JSON.stringify(
       (authResult.expiresIn || 0) * 1000 + new Date().getTime(),
     );

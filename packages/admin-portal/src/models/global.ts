@@ -1,4 +1,4 @@
-// 全局共享数据示例
+// Global shared data example
 import { DEFAULT_NAME } from '@/constants';
 import { useState } from 'react';
 

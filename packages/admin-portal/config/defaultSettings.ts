@@ -8,7 +8,7 @@ const Settings: ProLayoutProps & {
   logo?: string;
 } = {
   navTheme: 'light',
-  // 拂晓蓝
+  // Daybreak Blue
   colorPrimary: '#1890ff',
   layout: 'mix',
   contentWidth: 'Fluid',
@@ -20,7 +20,7 @@ const Settings: ProLayoutProps & {
   logo: 'https://cdn.prod.website-files.com/6053b42fb638a363a757494b/60f0fe84e98f8f0e1a3d9724_favicon-fitness-webflow-template-brix-templates.svg',
   iconfontUrl: '',
   token: {
-    // 参见ts声明，demo 见文档，通过token 修改样式
+    // See TS declaration, see documentation for demo, modify styles through token
     //https://procomponents.ant.design/components/layout#%E9%80%9A%E8%BF%87-token-%E4%BF%AE%E6%94%B9%E6%A0%B7%E5%BC%8F
   },
 };

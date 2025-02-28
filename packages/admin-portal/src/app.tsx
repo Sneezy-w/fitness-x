@@ -1,4 +1,4 @@
-// 运行时配置
+// Runtime configuration
 
 import {
   AvatarDropdown,
@@ -10,8 +10,8 @@ import { history, RequestConfig, RunTimeLayoutConfig } from '@umijs/max';
 import { Auth0UserProfile } from 'auth0-js';
 import defaultSettings from '../config/defaultSettings';
 import { errorConfig } from './requestErrorConfig';
-// 全局初始化数据配置，用于 Layout 用户信息和权限初始化
-// 更多信息见文档：https://umijs.org/docs/api/runtime-config#getinitialstate
+// Global initialization data configuration, used for Layout user information and permission initialization
+// More information in the documentation: https://umijs.org/docs/api/runtime-config#getinitialstate
 
 const loginPath = '/login';
 const callbackPath = '/callback';
@@ -70,7 +70,7 @@ export const layout: RunTimeLayoutConfig = ({
       // }
 
       //console.log('currentUser', currentUser);
-      // 如果没有登录，重定向到 login
+      // If not logged in, redirect to login
       if (
         !auth.isAuthenticated() &&
         location.pathname !== loginPath &&
@@ -86,7 +86,7 @@ export const layout: RunTimeLayoutConfig = ({
 /**
  * @name request configuration, can configure error handling
  * It provides a unified network request and error handling scheme based on axios and ahooks' useRequest.
- * @doc https://umijs.org/docs/max/request#配置
+ * @doc https://umijs.org/docs/max/request#configuration
  */
 export const request: RequestConfig = {
   ...errorConfig,
