@@ -37,7 +37,7 @@ const Dashboard = () => {
   const [upcomingBookings, setUpcomingBookings] = useState<Booking[]>([]);
   const [membership, setMembership] = useState<Membership | null>(null);
   //const [freeClasses, setFreeClasses] = useState<number>(0);
-  const [classStats, setClassStats] = useState<ClassStat[]>([]);
+  //const [classStats, setClassStats] = useState<ClassStat[]>([]);
   const [loading, setLoading] = useState({
     bookings: true,
     membership: true,
@@ -78,17 +78,17 @@ const Dashboard = () => {
         setLoading((prev) => ({ ...prev, membership: false }));
       }
 
-      try {
-        // Fetch class statistics
-        setLoading((prev) => ({ ...prev, stats: true }));
-        const statsResponse = await api.get("/bookings/member/stats");
-        setClassStats(statsResponse.data);
-      } catch (error) {
-        console.error("Error fetching class statistics:", error);
-        // Not showing toast for stats as it's less critical
-      } finally {
-        setLoading((prev) => ({ ...prev, stats: false }));
-      }
+      // try {
+      //   // Fetch class statistics
+      //   setLoading((prev) => ({ ...prev, stats: true }));
+      //   const statsResponse = await api.get("/bookings/member/stats");
+      //   setClassStats(statsResponse.data);
+      // } catch (error) {
+      //   console.error("Error fetching class statistics:", error);
+      //   // Not showing toast for stats as it's less critical
+      // } finally {
+      //   setLoading((prev) => ({ ...prev, stats: false }));
+      // }
     };
 
     fetchDashboardData();
@@ -218,7 +218,7 @@ const Dashboard = () => {
               <p className="text-sm text-gray-400">Last 30 days</p>
             </div>
           </div>
-          {loading.stats ? (
+          {/* {loading.stats ? (
             <div className="animate-pulse h-10 bg-gray-700 rounded"></div>
           ) : classStats.length > 0 ? (
             <div className="space-y-2">
@@ -239,9 +239,9 @@ const Dashboard = () => {
                 </Link>
               )}
             </div>
-          ) : (
-            <p className="text-gray-300 text-sm">No class activity yet.</p>
-          )}
+          ) : ( */}
+          <p className="text-gray-300 text-sm">No class activity yet.</p>
+          {/* )} */}
         </div>
       </div>
 

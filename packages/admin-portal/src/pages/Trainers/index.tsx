@@ -147,9 +147,9 @@ const TrainersPage = () => {
               Approve
             </Button>
           )}
-          <Button type="primary" danger onClick={() => handleDelete(record.id)}>
+          {/* <Button type="primary" danger onClick={() => handleDelete(record.id)}>
             Delete
-          </Button>
+          </Button> */}
         </Space>
       ),
     },

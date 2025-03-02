@@ -9,34 +9,42 @@ import toast from "react-hot-toast";
 interface Profile {
   id: string;
   name: string;
-  email: string;
+  //email: string;
   phone: string;
 }
 
 const Profile = () => {
-  const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
+  const { user, isLoading: loading, checkAuth } = useAuth();
+  //const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   const validationSchema = Yup.object({
     name: Yup.string().required("Name is required"),
-    email: Yup.string()
-      .email("Invalid email address")
-      .required("Email is required"),
+    // email: Yup.string()
+    //   .email("Invalid email address")
+    //   .required("Email is required"),
     phone: Yup.string().required("Phone number is required"),
   });
 
   const formik = useFormik({
     initialValues: {
       name: "",
-      email: "",
+      //email: "",
       phone: "",
     },
     validationSchema,
     onSubmit: async (values) => {
       try {
         setSaving(true);
-        await api.put("/members/profile", values);
+        const response = await api.patch("/auth/self/member/profile", {
+          full_name: values.name,
+          phone: values.phone,
+          //email: values.email,
+        });
+        const token = response.data.access_token;
+        localStorage.setItem("token", token);
+        await checkAuth();
+        //window.location.href = "/";
         toast.success("Profile updated successfully");
       } catch (error) {
         console.error("Error updating profile:", error);
@@ -47,29 +55,38 @@ const Profile = () => {
     },
   });
 
+  // useEffect(() => {
+  //   const fetchProfile = async () => {
+  //     try {
+  //       setLoading(true);
+  //       const response = await api.get("/members/self/profile");
+  //       const profileData: Profile = response.data;
+
+  //       // Update form values
+  //       formik.setValues({
+  //         name: profileData.name,
+  //         //email: profileData.email,
+  //         phone: profileData.phone,
+  //       });
+  //     } catch (error) {
+  //       console.error("Error fetching profile:", error);
+  //       toast.error("Failed to load profile information");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchProfile();
+  // }, []);
+
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        setLoading(true);
-        const response = await api.get("/members/profile");
-        const profileData: Profile = response.data;
-
-        // Update form values
-        formik.setValues({
-          name: profileData.name,
-          email: profileData.email,
-          phone: profileData.phone,
-        });
-      } catch (error) {
-        console.error("Error fetching profile:", error);
-        toast.error("Failed to load profile information");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProfile();
-  }, []);
+    if (user) {
+      formik.setValues({
+        name: user.name,
+        phone: user.phone || "",
+      });
+    }
+  }, [user]);
 
   return (
     <div>
@@ -117,7 +134,7 @@ const Profile = () => {
               )}
             </div>
 
-            <div>
+            {/* <div>
               <label className="block text-white text-sm font-semibold mb-2">
                 Email Address
               </label>
@@ -147,7 +164,7 @@ const Profile = () => {
               <p className="text-gray-400 text-xs mt-1">
                 Email address cannot be changed.
               </p>
-            </div>
+            </div> */}
 
             <div>
               <label className="block text-white text-sm font-semibold mb-2">

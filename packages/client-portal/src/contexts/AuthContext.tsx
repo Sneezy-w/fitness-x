@@ -4,6 +4,7 @@ import {
   useState,
   useEffect,
   ReactNode,
+  useCallback,
 } from "react";
 import { jwtDecode } from "jwt-decode";
 import api from "../services/api";
@@ -15,6 +16,7 @@ interface User {
   email: string;
   name: string;
   role: UserRole;
+  phone?: string;
 }
 
 interface DecodedToken {
@@ -22,12 +24,13 @@ interface DecodedToken {
   email: string;
   name: string;
   role: UserRole;
+  phone?: string;
   exp: number;
 }
 
 // Types for registration data
 interface RegisterData {
-  name: string;
+  full_name: string;
   email: string;
   password: string;
   [key: string]: string | number | boolean; // For additional fields
@@ -39,6 +42,7 @@ interface AuthContextType {
   login: (email: string, password: string, role: UserRole) => Promise<void>;
   register: (userData: RegisterData, role: UserRole) => Promise<void>;
   logout: () => void;
+  checkAuth: () => Promise<void>;
   isAuthenticated: boolean;
 }
 
@@ -56,39 +60,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // Check for stored token on load
-    const checkAuth = async () => {
-      const storedToken = localStorage.getItem("token");
-      if (storedToken) {
-        try {
-          const decoded = jwtDecode<DecodedToken>(storedToken);
+  const checkAuth = useCallback(async () => {
+    const storedToken = localStorage.getItem("token");
+    //console.log("storedToken", storedToken);
+    if (storedToken) {
+      try {
+        const decoded = jwtDecode<DecodedToken>(storedToken);
 
-          // Check if token is expired
-          if (decoded.exp * 1000 < Date.now()) {
-            localStorage.removeItem("token");
-            setUser(null);
-          } else {
-            // Set user from token
-            setUser({
-              id: decoded.sub,
-              email: decoded.email,
-              name: decoded.name,
-              role: decoded.role,
-            });
-
-            // Set authorization header for all requests
-            api.defaults.headers.common[
-              "Authorization"
-            ] = `Bearer ${storedToken}`;
-          }
-        } catch {
+        // Check if token is expired
+        if (decoded.exp * 1000 < Date.now()) {
           localStorage.removeItem("token");
           setUser(null);
+        } else {
+          // Set user from token
+          setUser({
+            id: decoded.sub,
+            email: decoded.email,
+            name: decoded.name,
+            role: decoded.role,
+            ...(decoded.phone && { phone: decoded.phone }),
+          });
+
+          // Set authorization header for all requests
+          api.defaults.headers.common[
+            "Authorization"
+          ] = `Bearer ${storedToken}`;
         }
+      } catch {
+        localStorage.removeItem("token");
+        setUser(null);
       }
-      setIsLoading(false);
-    };
+    }
+    setIsLoading(false);
+  }, []);
+
+  useEffect(() => {
+    // Check for stored token on load
 
     checkAuth();
   }, []);
@@ -111,6 +118,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         email: decoded.email,
         name: decoded.name,
         role: decoded.role,
+        ...(decoded.phone && { phone: decoded.phone }),
       });
     } finally {
       setIsLoading(false);
@@ -144,6 +152,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         register,
         logout,
         isAuthenticated: !!user,
+        checkAuth,
       }}
     >
       {children}

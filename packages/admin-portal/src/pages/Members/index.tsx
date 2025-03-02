@@ -95,7 +95,7 @@ const MembersPage = () => {
   ];
 
   return (
-    <PageContainer>
+    <PageContainer ghost>
       <ProTable<API.Service.Member>
         columns={columns}
         actionRef={actionRef}
@@ -125,10 +125,21 @@ const MembersPage = () => {
         pagination={{
           pageSize: 10,
         }}
-        toolbar={{
-          title: 'Members',
-          //subTitle: 'Manage your members',
-          //search: false,
+        toolbar={
+          {
+            //title: 'Members',
+            //subTitle: 'Manage your members',
+            //search: false,
+          }
+        }
+        scroll={{ x: 'max-content' }}
+        cardProps={{
+          bodyStyle: { padding: 0 },
+        }}
+        options={{
+          fullScreen: true,
+          reload: true,
+          density: true,
         }}
       />
     </PageContainer>

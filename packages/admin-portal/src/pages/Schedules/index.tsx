@@ -76,6 +76,15 @@ const SchedulesPage = () => {
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
+
+      // Validate that end time is after start time
+      const startTime = values.start_time;
+      const endTime = values.end_time;
+      if (endTime.isBefore(startTime)) {
+        message.error('End time must be after start time');
+        return;
+      }
+
       const formattedValues = {
         ...values,
         date: values.date.format('YYYY-MM-DD'),
@@ -204,10 +213,10 @@ const SchedulesPage = () => {
           <Button type="primary" onClick={() => showEditModal(record)}>
             Edit
           </Button>
-          {/* <Button type="primary" danger onClick={() => handleDelete(record.id)}>
+          <Button type="primary" danger onClick={() => handleDelete(record.id)}>
             Delete
-          </Button> */}
-          {!record.is_cancelled && (
+          </Button>
+          {/* {!record.is_cancelled && (
             <Button
               type="primary"
               danger
@@ -215,7 +224,7 @@ const SchedulesPage = () => {
             >
               Cancel
             </Button>
-          )}
+          )} */}
         </Space>
       ),
     },

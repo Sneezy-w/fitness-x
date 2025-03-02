@@ -27,8 +27,11 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => {
     //console.log("response", response);
-    if (response.data?.data?.success === false) {
-      throw new Error(response.data.data.errorMessage);
+    //console.log("response", response);
+    if (!response.data?.success) {
+      toast.error(response.data.errorMessage);
+      return Promise.reject(Error(response.data.errorMessage));
+      //throw new Error(response.data.data.errorMessage);
     }
     return response.data;
   },

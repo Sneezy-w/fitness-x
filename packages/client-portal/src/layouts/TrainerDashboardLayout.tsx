@@ -12,18 +12,18 @@ import {
 
 const TrainerDashboardLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, logout, isLoading, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   // Redirect if not authenticated or not a trainer
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isLoading && !isAuthenticated) {
       navigate("/auth");
-    } else if (user?.role !== "trainer") {
+    } else if (!isLoading && user?.role !== "trainer") {
       navigate("/");
     }
-  }, [isAuthenticated, user, navigate]);
+  }, [isAuthenticated, user, navigate, isLoading]);
 
   const handleLogout = () => {
     logout();

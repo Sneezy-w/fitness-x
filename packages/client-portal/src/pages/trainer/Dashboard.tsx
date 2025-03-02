@@ -47,17 +47,19 @@ const Dashboard = () => {
     const fetchTrainerData = async () => {
       try {
         // Get trainer approval status
-        const profileResponse = await api.get("/trainers/profile");
-        setApprovalStatus(profileResponse.data.status);
+        const profileResponse = await api.get("/auth/self/trainer/profile");
+        console.log("profileResponse", profileResponse);
 
-        if (profileResponse.data.status !== "approved") {
+        if (!profileResponse.data.is_approved) {
           return; // Don't load other data if not approved
+        } else {
+          setApprovalStatus("approved");
         }
 
         // Fetch today's classes
-        setLoading((prev) => ({ ...prev, today: true }));
-        const todayResponse = await api.get("/schedules/trainer/today");
-        setTodayClasses(todayResponse.data);
+        // setLoading((prev) => ({ ...prev, today: true }));
+        // const todayResponse = await api.get("/schedules/trainer/today");
+        // setTodayClasses(todayResponse.data);
       } catch (error) {
         console.error(
           "Error fetching trainer profile or today's classes:",
@@ -70,9 +72,9 @@ const Dashboard = () => {
 
       try {
         // Fetch upcoming classes
-        setLoading((prev) => ({ ...prev, upcoming: true }));
-        const upcomingResponse = await api.get("/schedules/trainer/upcoming");
-        setUpcomingClasses(upcomingResponse.data);
+        // setLoading((prev) => ({ ...prev, upcoming: true }));
+        // const upcomingResponse = await api.get("/schedules/trainer/upcoming");
+        // setUpcomingClasses(upcomingResponse.data);
       } catch (error) {
         console.error("Error fetching upcoming classes:", error);
         toast.error("Failed to load your upcoming classes");
@@ -82,11 +84,11 @@ const Dashboard = () => {
 
       try {
         // Fetch attendance stats
-        setLoading((prev) => ({ ...prev, stats: true }));
-        const statsResponse = await api.get(
-          "/schedules/trainer/attendance-stats"
-        );
-        setAttendanceStats(statsResponse.data);
+        // setLoading((prev) => ({ ...prev, stats: true }));
+        // const statsResponse = await api.get(
+        //   "/schedules/trainer/attendance-stats"
+        // );
+        // setAttendanceStats(statsResponse.data);
       } catch (error) {
         console.error("Error fetching attendance stats:", error);
         // Not showing toast for stats as it's less critical

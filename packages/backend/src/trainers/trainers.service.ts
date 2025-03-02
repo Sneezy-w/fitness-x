@@ -9,6 +9,7 @@ import * as bcrypt from 'bcrypt';
 import { Trainer } from './entities/trainer.entity';
 import { CreateTrainerDto } from './dto/create-trainer.dto';
 import { UpdateTrainerDto } from './dto/update-trainer.dto';
+import { ApiException } from 'src/common/exceptions/api.exception';
 
 @Injectable()
 export class TrainersService {
@@ -107,18 +108,14 @@ export class TrainersService {
     email: string,
     password: string,
   ): Promise<Trainer | null> {
-    try {
-      const trainer = await this.findByEmail(email);
-      if (
-        trainer.is_approved &&
-        (await bcrypt.compare(password, trainer.password))
-      ) {
+    const trainer = await this.findByEmail(email);
+    if (await bcrypt.compare(password, trainer.password)) {
+      if (trainer.is_approved) {
         return trainer;
+      } else {
+        throw new ApiException('Trainer is not approved');
       }
-      return null;
-    } catch (error) {
-      console.error(error);
-      return null;
     }
+    return null;
   }
 }

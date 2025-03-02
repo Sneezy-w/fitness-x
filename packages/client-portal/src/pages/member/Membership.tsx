@@ -8,16 +8,26 @@ import {
 import api from "../../services/api";
 import toast from "react-hot-toast";
 import moment from "moment";
+import { MembershipType } from "../../types/models";
 
-interface MembershipType {
-  id: string;
-  name: string;
-  price: number;
-  description: string;
-  classesPerMonth: number;
-  features: string[];
-  isActive?: boolean;
-}
+// Add default features arrays
+const membershipFeatures = [
+  [
+    "Access to online classes",
+    "Access to Facebook group",
+    "10 health & fitness guides",
+  ],
+  [
+    "All in Beginner package",
+    "1-on-1 personal trainning",
+    "Advanced training help",
+  ],
+  [
+    "All in Intermediate package",
+    "Access to my online tutorials",
+    "Dedicated training help",
+  ],
+];
 
 interface MembershipSubscription {
   id: string;
@@ -80,11 +90,14 @@ const Membership = () => {
       setLoading((prev) => ({ ...prev, membershipTypes: true }));
       const response = await api.get("/membership-types");
 
-      // Mark the active membership
-      const typesWithActive = response.data.map((type: MembershipType) => ({
-        ...type,
-        isActive: currentMembership?.membershipTypeId === type.id,
-      }));
+      // Mark the active membership and add features
+      const typesWithActive = response.data.map(
+        (type: MembershipType, index: number) => ({
+          ...type,
+          isActive: currentMembership?.membershipTypeId === type.id,
+          features: membershipFeatures[index % membershipFeatures.length],
+        })
+      );
 
       setMembershipTypes(typesWithActive);
     } catch (error) {
@@ -228,7 +241,7 @@ const Membership = () => {
                 </div>
                 <div className="mt-3 md:mt-0 text-right">
                   <p className="text-xl font-bold text-white">
-                    ${currentMembership.membershipType.price}
+                    ${currentMembership.membershipType.monthly_price}
                     <span className="text-sm font-normal text-gray-400">
                       /month
                     </span>
@@ -248,7 +261,7 @@ const Membership = () => {
                 <p className="text-2xl font-bold text-white">
                   {currentMembership.remainingClasses}
                   <span className="text-sm font-normal text-gray-400">
-                    /{currentMembership.membershipType.classesPerMonth}
+                    /{currentMembership.membershipType.class_limit}
                   </span>
                 </p>
               </div>
@@ -369,16 +382,17 @@ const Membership = () => {
                     {membershipType.name}
                   </h3>
                   <p className="text-3xl font-bold text-white mb-4">
-                    ${membershipType.price}
+                    ${membershipType.monthly_price}
                     <span className="text-base font-normal text-gray-400">
                       /month
                     </span>
                   </p>
                   <p className="text-gray-300 text-sm mb-4">
-                    {membershipType.description}
+                    {membershipType.description ||
+                      "Premium membership with exclusive benefits"}
                   </p>
                   <p className="text-primary font-semibold mb-4">
-                    {membershipType.classesPerMonth} classes per month
+                    {membershipType.class_limit} classes per month
                   </p>
                   <ul className="space-y-2 mb-6">
                     {membershipType.features.map((feature, index) => (

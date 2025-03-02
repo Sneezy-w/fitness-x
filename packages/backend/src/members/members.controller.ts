@@ -9,7 +9,8 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
-  Req,
+  //Req,
+  //Req,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -25,6 +26,7 @@ import { Auth0AuthGuard } from '../auth/guards/auth0-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../auth/enums/role.enum';
+//import { UpdateMemberProfileDto } from './dto/update-member-profile.dto';
 
 @ApiTags('members')
 @Controller('members')
@@ -56,9 +58,9 @@ export class MembersController {
   @ApiOperation({ summary: 'Get a member by ID' })
   @ApiResponse({ status: 200, description: 'Member details' })
   @ApiResponse({ status: 404, description: 'Member not found' })
-  findOne(@Param('id') id: string, @Req() request: Express.Request) {
+  findOne(@Param('id') id: string) {
     //console.log('id', id);
-    console.log('user', request.user);
+    //console.log('user', request.user);
     return this.membersService.findOne(+id);
   }
 

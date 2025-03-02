@@ -9,6 +9,7 @@ import * as bcrypt from 'bcrypt';
 import { Member } from './entities/member.entity';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
+import { UpdateMemberProfileDto } from './dto/update-member-profile.dto';
 
 @Injectable()
 export class MembersService {
@@ -93,6 +94,15 @@ export class MembersService {
 
     // Update the member with the provided data
     Object.assign(member, updateMemberDto);
+    return this.membersRepository.save(member);
+  }
+
+  async updateProfile(
+    id: number,
+    updateMemberProfileDto: UpdateMemberProfileDto,
+  ): Promise<Member> {
+    const member = await this.findOne(id);
+    Object.assign(member, updateMemberProfileDto);
     return this.membersRepository.save(member);
   }
 

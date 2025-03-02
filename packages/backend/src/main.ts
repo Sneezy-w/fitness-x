@@ -19,7 +19,7 @@ async function bootstrap() {
   );
 
   // Enable CORS for frontend applications
-  app.enableCors();
+  //app.enableCors();
 
   // Use Helmet for security
   app.use(helmet());

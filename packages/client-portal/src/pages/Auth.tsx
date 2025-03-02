@@ -24,7 +24,7 @@ const Auth = () => {
 
   // Registration form validation schema
   const registerSchema = Yup.object({
-    name: Yup.string().required("Name is required"),
+    full_name: Yup.string().required("Name is required"),
     email: Yup.string()
       .email("Invalid email address")
       .required("Email is required"),
@@ -34,11 +34,17 @@ const Auth = () => {
     confirmPassword: Yup.string()
       .oneOf([Yup.ref("password")], "Passwords must match")
       .required("Confirm password is required"),
-    phone: Yup.string().required("Phone number is required"),
+    ...(userType === "member"
+      ? {
+          phone: Yup.string().required("Phone number is required"),
+        }
+      : {}),
     ...(userType === "trainer"
       ? {
           specialization: Yup.string().required("Specialization is required"),
-          experience: Yup.string().required("Years of experience is required"),
+          experience_years: Yup.number()
+            .min(0, "Years of experience must be at least 0")
+            .required("Years of experience is required"),
         }
       : {}),
   });
@@ -56,9 +62,9 @@ const Auth = () => {
         toast.success(`Logged in successfully as ${userType}`);
         navigate(userType === "member" ? "/member" : "/trainer");
       } catch (error: any) {
-        toast.error(
-          error.response?.data?.message || "Failed to login. Please try again."
-        );
+        // toast.error(
+        //   error.response?.data?.message || "Failed to login. Please try again."
+        // );
       } finally {
         setSubmitting(false);
       }
@@ -68,26 +74,30 @@ const Auth = () => {
   // Register form
   const registerFormik = useFormik({
     initialValues: {
-      name: "",
+      full_name: "",
       email: "",
       password: "",
       confirmPassword: "",
       phone: "",
       specialization: "",
-      experience: "",
+      experience_years: 0,
     },
     validationSchema: registerSchema,
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       try {
         const userData = {
-          name: values.name,
+          full_name: values.full_name,
           email: values.email,
           password: values.password,
-          phone: values.phone,
+          ...(userType === "member"
+            ? {
+                phone: values.phone,
+              }
+            : {}),
           ...(userType === "trainer"
             ? {
                 specialization: values.specialization,
-                experience: values.experience,
+                experience_years: values.experience_years,
               }
             : {}),
         };
@@ -246,23 +256,25 @@ const Auth = () => {
               </div>
               <input
                 type="text"
-                name="name"
+                name="full_name"
                 placeholder="Enter your full name"
                 className={`w-full pl-10 pr-3 py-2 rounded-md bg-neutral text-white border ${
-                  registerFormik.errors.name && registerFormik.touched.name
+                  registerFormik.errors.full_name &&
+                  registerFormik.touched.full_name
                     ? "border-red-500"
                     : "border-gray-600"
                 }`}
-                value={registerFormik.values.name}
+                value={registerFormik.values.full_name}
                 onChange={registerFormik.handleChange}
                 onBlur={registerFormik.handleBlur}
               />
             </div>
-            {registerFormik.errors.name && registerFormik.touched.name && (
-              <p className="text-red-500 text-xs mt-1">
-                {registerFormik.errors.name}
-              </p>
-            )}
+            {registerFormik.errors.full_name &&
+              registerFormik.touched.full_name && (
+                <p className="text-red-500 text-xs mt-1">
+                  {registerFormik.errors.full_name}
+                </p>
+              )}
           </div>
 
           <div>
@@ -294,34 +306,36 @@ const Auth = () => {
             )}
           </div>
 
-          <div>
-            <label className="block text-white text-sm font-semibold mb-2">
-              Phone Number
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                <FiPhone />
+          {userType === "member" && (
+            <div>
+              <label className="block text-white text-sm font-semibold mb-2">
+                Phone Number
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                  <FiPhone />
+                </div>
+                <input
+                  type="tel"
+                  name="phone"
+                  placeholder="Enter your phone number"
+                  className={`w-full pl-10 pr-3 py-2 rounded-md bg-neutral text-white border ${
+                    registerFormik.errors.phone && registerFormik.touched.phone
+                      ? "border-red-500"
+                      : "border-gray-600"
+                  }`}
+                  value={registerFormik.values.phone}
+                  onChange={registerFormik.handleChange}
+                  onBlur={registerFormik.handleBlur}
+                />
               </div>
-              <input
-                type="tel"
-                name="phone"
-                placeholder="Enter your phone number"
-                className={`w-full pl-10 pr-3 py-2 rounded-md bg-neutral text-white border ${
-                  registerFormik.errors.phone && registerFormik.touched.phone
-                    ? "border-red-500"
-                    : "border-gray-600"
-                }`}
-                value={registerFormik.values.phone}
-                onChange={registerFormik.handleChange}
-                onBlur={registerFormik.handleBlur}
-              />
+              {registerFormik.errors.phone && registerFormik.touched.phone && (
+                <p className="text-red-500 text-xs mt-1">
+                  {registerFormik.errors.phone}
+                </p>
+              )}
             </div>
-            {registerFormik.errors.phone && registerFormik.touched.phone && (
-              <p className="text-red-500 text-xs mt-1">
-                {registerFormik.errors.phone}
-              </p>
-            )}
-          </div>
+          )}
 
           <div>
             <label className="block text-white text-sm font-semibold mb-2">
@@ -419,23 +433,23 @@ const Auth = () => {
                   Years of Experience
                 </label>
                 <input
-                  type="text"
-                  name="experience"
-                  placeholder="e.g., 3 years"
+                  type="number"
+                  name="experience_years"
+                  placeholder="e.g., 3"
                   className={`w-full px-3 py-2 rounded-md bg-neutral text-white border ${
-                    registerFormik.errors.experience &&
-                    registerFormik.touched.experience
+                    registerFormik.errors.experience_years &&
+                    registerFormik.touched.experience_years
                       ? "border-red-500"
                       : "border-gray-600"
                   }`}
-                  value={registerFormik.values.experience}
+                  value={registerFormik.values.experience_years}
                   onChange={registerFormik.handleChange}
                   onBlur={registerFormik.handleBlur}
                 />
-                {registerFormik.errors.experience &&
-                  registerFormik.touched.experience && (
+                {registerFormik.errors.experience_years &&
+                  registerFormik.touched.experience_years && (
                     <p className="text-red-500 text-xs mt-1">
-                      {registerFormik.errors.experience}
+                      {registerFormik.errors.experience_years}
                     </p>
                   )}
               </div>

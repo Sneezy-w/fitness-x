@@ -33,12 +33,14 @@ export class AuthService {
     id: string;
     role: Role;
     name: string;
+    phone?: string;
   }) {
     const payload = {
       email: user.email,
       sub: user.id,
       name: user.name,
       role: user.role,
+      ...(user.phone && { phone: user.phone }),
     };
     return {
       access_token: this.jwtService.sign(payload),
