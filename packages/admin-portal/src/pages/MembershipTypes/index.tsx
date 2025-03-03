@@ -22,6 +22,8 @@ const MembershipTypesPage = () => {
     useState<API.Service.MembershipType | null>(null);
   const [form] = Form.useForm();
 
+  const [canCreate, setCanCreate] = useState(true);
+
   const showCreateModal = () => {
     setModalType('create');
     setCurrentRecord(null);
@@ -157,6 +159,8 @@ const MembershipTypesPage = () => {
         actionRef={actionRef}
         request={async () => {
           const data = await getAllMembershipTypes();
+          //const activeCount = data.data.filter(item => item.is_active).length;
+          setCanCreate((data?.data?.length || 0) < 3);
           return {
             data: data.data || [],
             success: true,
@@ -169,11 +173,21 @@ const MembershipTypesPage = () => {
         }}
         dateFormatter="string"
         headerTitle="Membership Types"
-        toolBarRender={() => [
-          <Button key="add" type="primary" onClick={showCreateModal}>
-            Create New Membership Type
-          </Button>,
-        ]}
+        toolBarRender={() => {
+          if (canCreate) {
+            return [
+              <Button
+                key="add"
+                type="primary"
+                onClick={showCreateModal}
+                disabled={!canCreate}
+              >
+                Create New Membership Type
+              </Button>,
+            ];
+          }
+          return [];
+        }}
       />
 
       <Modal
