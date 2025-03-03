@@ -59,20 +59,20 @@ const MembershipTypesPage = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDeactivate = async (id: number) => {
     Modal.confirm({
-      title: 'Are you sure you want to delete this membership type?',
+      title: 'Are you sure you want to deactivate this membership type?',
       content: 'This action can be undone later.',
-      okText: 'Yes, delete it',
+      okText: 'Yes, deactivate it',
       okType: 'danger',
       cancelText: 'Cancel',
       onOk: async () => {
         try {
           await deleteMembershipType(id);
-          message.success('Membership type deleted successfully');
+          message.success('Membership type deactivated successfully');
           actionRef.current?.reload();
         } catch (error) {
-          message.error('Failed to delete membership type');
+          message.error('Failed to deactivate membership type');
           console.error('Error:', error);
         }
       },
@@ -132,7 +132,7 @@ const MembershipTypesPage = () => {
           <Button type="primary" onClick={() => showEditModal(record)}>
             Edit
           </Button>
-          {record.deleted_at ? (
+          {!record.is_active ? (
             <Button type="default" onClick={() => handleRestore(record.id)}>
               Restore
             </Button>
@@ -140,9 +140,9 @@ const MembershipTypesPage = () => {
             <Button
               type="primary"
               danger
-              onClick={() => handleDelete(record.id)}
+              onClick={() => handleDeactivate(record.id)}
             >
-              Delete
+              Deactivate
             </Button>
           )}
         </Space>
