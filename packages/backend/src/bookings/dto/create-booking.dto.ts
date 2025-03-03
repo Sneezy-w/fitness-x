@@ -8,7 +8,7 @@ export class CreateBookingDto {
     type: Number,
   })
   @IsNumber()
-  @IsNotEmpty()
+  @IsOptional()
   member_id: number;
 
   @ApiProperty({

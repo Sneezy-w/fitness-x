@@ -12,22 +12,36 @@ import {
 } from "react-icons/fi";
 import api from "../../services/api";
 import toast from "react-hot-toast";
+import { useAuth } from "../../contexts/AuthContext";
 
 // Setup localizer for the calendar
 const localizer = momentLocalizer(moment);
 
 interface ClassSchedule {
-  id: string;
-  className: string;
+  id: number;
+  class_id: number;
+  trainer_id: number;
   date: string;
-  startTime: string;
-  endTime: string;
-  location: string;
-  trainerName: string;
+  start_time: string;
+  end_time: string;
   capacity: number;
-  availableSpots: number;
+  is_cancelled: boolean;
+  created_at: string;
+  updated_at: string;
   isBooked: boolean;
-  description?: string;
+  class: {
+    id: number;
+    name: string;
+    description: string;
+    //category: string;
+    duration_minutes: number;
+  };
+  trainer: {
+    id: number;
+    full_name: string;
+   
+  };
+  bookings?: any[];
 }
 
 interface CalendarEvent {
@@ -44,6 +58,7 @@ interface ToolbarProps {
 }
 
 const Classes = () => {
+  const { user } = useAuth();
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [loading, setLoading] = useState(true);
@@ -55,7 +70,7 @@ const Classes = () => {
   const [membershipStatus, setMembershipStatus] = useState({
     hasActiveMembership: false,
     remainingClasses: 0,
-    freeClasses: 0,
+    //freeClasses: 0,
     loading: true,
   });
 
@@ -84,21 +99,21 @@ const Classes = () => {
 
       // Fetch membership info
       const membershipResponse = await api.get(
-        "/membership-subscriptions/current"
+        "/membership-subscriptions/member/current"
       );
-      const hasActiveMembership = membershipResponse.data?.status === "active";
-      const remainingClasses = membershipResponse.data?.remainingClasses || 0;
+      const hasActiveMembership = membershipResponse.data && membershipResponse.data?.status !== "expired";
+      const remainingClasses = membershipResponse.data?.remaining_classes || 0;
 
       // Fetch free classes
-      const freeClassesResponse = await api.get(
-        "/free-class-allocations/current"
-      );
-      const freeClasses = freeClassesResponse.data?.remainingClasses || 0;
+      // const freeClassesResponse = await api.get(
+      //   "/free-class-allocations/member/current/remaining"
+      // );
+      // const freeClasses = freeClassesResponse.data?.remainingClasses || 0;
 
       setMembershipStatus({
         hasActiveMembership,
         remainingClasses,
-        freeClasses,
+        //freeClasses,
         loading: false,
       });
     } catch (error) {
@@ -116,17 +131,24 @@ const Classes = () => {
   const fetchAvailableClasses = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/schedules/available");
+      const response = await api.get("/schedules/public/upcoming");
 
       // Process the data to fit the Calendar component
       const formattedEvents: CalendarEvent[] = response.data.map(
         (cls: ClassSchedule) => {
-          const startDateTime = new Date(`${cls.date}T${cls.startTime}`);
-          const endDateTime = new Date(`${cls.date}T${cls.endTime}`);
+          const startDateTime = new Date(`${cls.date}T${cls.start_time}`);
+          const endDateTime = new Date(`${cls.date}T${cls.end_time}`);
+
+          const isBooked = cls.bookings?.some(
+            (booking) => booking.member_id == user?.id
+          );
+
+          // console.log(isBooked);
+          cls.isBooked = isBooked || false;
 
           return {
-            id: cls.id,
-            title: cls.className,
+            id: cls.id.toString(),
+            title: cls.class.name,
             start: startDateTime,
             end: endDateTime,
             resource: cls,
@@ -162,7 +184,7 @@ const Classes = () => {
 
     try {
       setBookingLoading(true);
-      await api.post(`/bookings`, { scheduleId: selectedEvent.id });
+      await api.post(`/bookings/member/self`, { schedule_id: selectedEvent.id });
       toast.success("Class booked successfully!");
 
       // Refresh data
@@ -257,11 +279,11 @@ const Classes = () => {
                   ) : (
                     <span>No active membership</span>
                   )}
-                  {membershipStatus.freeClasses > 0 && (
+                  {/* {membershipStatus.freeClasses > 0 && (
                     <span className="ml-1">
                       (+ {membershipStatus.freeClasses} free classes)
                     </span>
-                  )}
+                  )} */}
                 </p>
               </div>
             )}
@@ -357,7 +379,7 @@ const Classes = () => {
                         {event.title}
                       </h3>
                       <p className="text-sm text-gray-400">
-                        {event.resource.trainerName} • {event.resource.location}
+                        {event.resource.trainer.full_name} • {event.resource.class.name}
                       </p>
                     </div>
                   </div>
@@ -373,7 +395,7 @@ const Classes = () => {
                       <FiUsers className="text-gray-400 mr-2" />
                       <span className="text-sm text-gray-300">
                         {event.resource.capacity -
-                          event.resource.availableSpots}
+                          (event.resource.bookings?.length || 0)}
                         /{event.resource.capacity} booked
                       </span>
                     </div>
@@ -398,7 +420,7 @@ const Classes = () => {
             <div className="p-6">
               <div className="flex justify-between items-start mb-6">
                 <h2 className="text-2xl font-bold text-white">
-                  {selectedEvent.className}
+                  {selectedEvent.class.name}
                 </h2>
                 <button
                   onClick={handleCloseEventDetails}
@@ -426,11 +448,11 @@ const Classes = () => {
                     <div>
                       <p className="text-sm text-gray-400">Time</p>
                       <p className="text-white">
-                        {moment(selectedEvent.startTime, "HH:mm").format(
+                        {moment(selectedEvent.start_time, "HH:mm").format(
                           "h:mm A"
                         )}{" "}
                         -{" "}
-                        {moment(selectedEvent.endTime, "HH:mm").format(
+                        {moment(selectedEvent.end_time, "HH:mm").format(
                           "h:mm A"
                         )}
                       </p>
@@ -438,20 +460,20 @@ const Classes = () => {
                   </div>
                 </div>
                 <div>
-                  <div className="flex items-center mb-4">
+                  {/* <div className="flex items-center mb-4">
                     <FiMapPin className="text-primary mr-3" size={20} />
                     <div>
                       <p className="text-sm text-gray-400">Location</p>
-                      <p className="text-white">{selectedEvent.location}</p>
+                      <p className="text-white">{selectedEvent.class.category}</p>
                     </div>
-                  </div>
+                  </div> */}
                   <div className="flex items-center mb-4">
                     <FiUsers className="text-primary mr-3" size={20} />
                     <div>
                       <p className="text-sm text-gray-400">Availability</p>
                       <p className="text-white">
-                        {selectedEvent.availableSpots} spots available (out of{" "}
-                        {selectedEvent.capacity})
+                        {selectedEvent.capacity -
+                          (selectedEvent.bookings?.length || 0)} spots available (out of {selectedEvent.capacity})
                       </p>
                     </div>
                   </div>
@@ -459,12 +481,12 @@ const Classes = () => {
               </div>
 
               {/* Description if available */}
-              {selectedEvent.description && (
+              {selectedEvent.class.description && (
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold text-white mb-2">
                     Class Description
                   </h3>
-                  <p className="text-gray-300">{selectedEvent.description}</p>
+                  <p className="text-gray-300">{selectedEvent.class.description}</p>
                 </div>
               )}
 
@@ -473,7 +495,7 @@ const Classes = () => {
                 <h3 className="text-lg font-semibold text-white mb-2">
                   Instructor
                 </h3>
-                <p className="text-gray-300">{selectedEvent.trainerName}</p>
+                <p className="text-gray-300">{selectedEvent.trainer.full_name}</p>
               </div>
 
               {/* Booking Section */}
@@ -483,17 +505,18 @@ const Classes = () => {
                     <FiCheck size={20} className="mr-2" />
                     <span>You're booked for this class</span>
                   </div>
-                ) : selectedEvent.availableSpots === 0 ? (
+                ) : selectedEvent.capacity -
+                  (selectedEvent.bookings?.length || 0) === 0 ? (
                   <div className="flex items-center text-red-500">
                     <FiAlertCircle size={20} className="mr-2" />
                     <span>This class is fully booked</span>
                   </div>
                 ) : !membershipStatus.hasActiveMembership &&
-                  membershipStatus.freeClasses === 0 ? (
+                  membershipStatus.remainingClasses === 0 ? (
                   <div className="flex items-center text-yellow-500">
                     <FiAlertCircle size={20} className="mr-2" />
                     <span>
-                      You need an active membership or free classes to book
+                      You need an active membership to book
                     </span>
                   </div>
                 ) : (
@@ -511,9 +534,10 @@ const Classes = () => {
                   </button>
 
                   {!selectedEvent.isBooked &&
-                    selectedEvent.availableSpots > 0 &&
+                    selectedEvent.capacity -
+                      (selectedEvent.bookings?.length || 0) > 0 &&
                     (membershipStatus.hasActiveMembership ||
-                      membershipStatus.freeClasses > 0) && (
+                      membershipStatus.remainingClasses > 0) && (
                       <button
                         onClick={handleBookClass}
                         className="bg-primary hover:bg-accent text-white py-2 px-4 rounded-md transition flex items-center"

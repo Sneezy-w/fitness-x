@@ -8,6 +8,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -21,6 +22,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../auth/enums/role.enum';
+import { Request } from 'express';
 
 @ApiTags('free-class-allocations')
 @Controller('free-class-allocations')
@@ -80,6 +82,21 @@ export class FreeClassAllocationsController {
   @ApiResponse({ status: 404, description: 'Member not found' })
   getRemainingFreeClasses(@Param('memberId') memberId: string) {
     return this.freeClassAllocationsService.getRemainingFreeClasses(+memberId);
+  }
+
+  @Get('member/current/remaining')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get remaining free classes for the current authenticated member',
+  })
+  @ApiResponse({ status: 200, description: 'Number of remaining free classes' })
+  @ApiResponse({ status: 404, description: 'Member not found' })
+  getRemainingFreeClassesForCurrentMember(@Req() request: Request) {
+    const currentUser = request.user as Express.MemberTrainerUser;
+    return this.freeClassAllocationsService.getRemainingFreeClasses(
+      currentUser.id,
+    );
   }
 
   @Get(':id')

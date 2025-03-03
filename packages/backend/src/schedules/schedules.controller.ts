@@ -26,6 +26,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../auth/enums/role.enum';
 import { Auth0AuthGuard } from 'src/auth/guards/auth0-auth.guard';
+
 @ApiTags('schedules')
 @Controller('schedules')
 export class SchedulesController {
@@ -50,7 +51,7 @@ export class SchedulesController {
     return this.schedulesService.findAll();
   }
 
-  @Get('upcoming')
+  @Get('public/upcoming')
   @ApiOperation({ summary: 'Get all upcoming schedules' })
   @ApiResponse({ status: 200, description: 'List of upcoming schedules' })
   findUpcoming() {
@@ -138,5 +139,17 @@ export class SchedulesController {
   @ApiResponse({ status: 404, description: 'Schedule not found' })
   remove(@Param('id') id: string) {
     return this.schedulesService.remove(+id);
+  }
+
+  @Get('available')
+  @UseGuards(Auth0AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get all available upcoming schedules' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of available upcoming schedules',
+  })
+  findAvailable() {
+    return this.schedulesService.findUpcoming();
   }
 }

@@ -11,16 +11,37 @@ import toast from "react-hot-toast";
 import moment from "moment";
 
 interface Booking {
-  id: string;
-  scheduleId: string;
-  className: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  location: string;
-  trainerName: string;
-  status: "upcoming" | "completed" | "cancelled";
-  attendanceMarked?: boolean;
+  id: number;
+  schedule_id: number;
+  member_id: number;
+  status: string;
+  attendance_status?: string;
+  created_at: string;
+  updated_at: string;
+  // Include related data
+  schedule: {
+    id: number;
+    class_id: number;
+    trainer_id: number;
+    date: string;
+    start_time: string;
+    end_time: string;
+    capacity: number;
+    is_cancelled: boolean;
+    created_at: string;
+    updated_at: string;
+    class: {
+      id: number;
+      name: string;
+      description: string;
+      category: string;
+      duration_minutes: number;
+    };
+    trainer: {
+      id: number;
+      full_name: string;
+    };
+  };
 }
 
 const Bookings = () => {
@@ -54,7 +75,7 @@ const Bookings = () => {
   };
 
   const isPastBooking = (booking: Booking) => {
-    const bookingDateTime = new Date(`${booking.date}T${booking.endTime}`);
+    const bookingDateTime = new Date(`${booking.schedule.date}T${booking.schedule.end_time}`);
     return bookingDateTime < new Date();
   };
 
@@ -172,10 +193,10 @@ const Bookings = () => {
                       </div>
                       <div>
                         <h3 className="text-lg font-semibold text-white">
-                          {booking.className}
+                          {booking.schedule.class.name}
                         </h3>
                         <p className="text-sm text-gray-400">
-                          with {booking.trainerName}
+                          with {booking.schedule.trainer.full_name}
                         </p>
                       </div>
                     </div>
@@ -183,20 +204,20 @@ const Bookings = () => {
                       <div className="flex items-center">
                         <FiClock className="text-gray-400 mr-2" />
                         <span className="text-sm text-gray-300">
-                          {formatDate(booking.date)} •{" "}
-                          {formatTime(booking.startTime)} -{" "}
-                          {formatTime(booking.endTime)}
+                          {formatDate(booking.schedule.date)} •{" "}
+                          {formatTime(booking.schedule.start_time)} -{" "}
+                          {formatTime(booking.schedule.end_time)}
                         </span>
                       </div>
                       <div className="flex items-center">
-                        <FiMapPin className="text-gray-400 mr-2" />
+                        {/* <FiMapPin className="text-gray-400 mr-2" /> */}
                         <span className="text-sm text-gray-300">
-                          {booking.location}
+                          {booking.schedule.class.description}
                         </span>
                       </div>
                       {isPast && (
                         <div className="flex items-center">
-                          {booking.attendanceMarked ? (
+                          {booking.attendance_status === "attended" ? (
                             <span className="text-green-500 flex items-center">
                               <FiCheck className="mr-1" /> Attendance marked
                             </span>

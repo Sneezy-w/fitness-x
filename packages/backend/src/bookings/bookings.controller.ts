@@ -42,6 +42,26 @@ export class BookingsController {
     return this.bookingsService.create(createBookingDto);
   }
 
+  @Post('member/self')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.MEMBER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create a new booking' })
+  @ApiResponse({ status: 201, description: 'Booking created successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 404, description: 'Member or schedule not found' })
+  createMemberBooking(
+    @Body() createBookingDto: CreateBookingDto,
+    @Req() request: Request,
+  ) {
+    const currentUser = request.user as Express.MemberTrainerUser;
+    if (!currentUser) {
+      throw new UnauthorizedException('User not found');
+    }
+    createBookingDto.member_id = currentUser.id;
+    return this.bookingsService.create(createBookingDto);
+  }
+
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
@@ -52,10 +72,26 @@ export class BookingsController {
     return this.bookingsService.findAll();
   }
 
+  @Get('member')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get all bookings for the current authenticated member',
+  })
+  @ApiResponse({ status: 200, description: 'List of member bookings' })
+  @ApiResponse({ status: 404, description: 'Member not found' })
+  findMemberBookings(@Req() request: Request) {
+    const currentUser = request.user as Express.MemberTrainerUser;
+    if (!currentUser) {
+      throw new UnauthorizedException('User not found');
+    }
+    return this.bookingsService.findByMemberId(currentUser.id);
+  }
+
   @Get(':memberId/member')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get all bookings for a member' })
+  @ApiOperation({ summary: 'Get all bookings for a specific member' })
   @ApiResponse({ status: 200, description: 'List of member bookings' })
   @ApiResponse({ status: 404, description: 'Member not found' })
   findByMemberId(@Param('memberId') memberId: string) {

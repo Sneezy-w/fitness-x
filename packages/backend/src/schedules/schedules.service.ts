@@ -238,4 +238,17 @@ export class SchedulesService {
 
     return query.getMany();
   }
+
+  async findAvailableWithBookingStatus() {
+    // For now, simply return upcoming schedules
+    // In a real implementation, we would check if the member has booked each schedule
+    const upcomingSchedules = await this.findUpcoming();
+
+    // We'll add a placeholder isBooked field to each schedule
+    // In a real implementation, this would be determined by querying bookings
+    return upcomingSchedules.map((schedule) => ({
+      ...schedule,
+      isBooked: false, // Default to false as we can't check without proper repository
+    }));
+  }
 }
