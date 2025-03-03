@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useFormik } from "formik";
@@ -9,8 +9,14 @@ import { FiUser, FiLock, FiMail, FiPhone } from "react-icons/fi";
 const Auth = () => {
   const [activeTab, setActiveTab] = useState("login");
   const [userType, setUserType] = useState("member");
-  const { login, register } = useAuth();
+  const { login, register, user, isLoading } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user && !isLoading) {
+      navigate(userType === "member" ? "/member" : "/trainer");
+    }
+  }, [user, userType, navigate, isLoading]);
 
   // Login form validation schema
   const loginSchema = Yup.object({

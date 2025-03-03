@@ -10,8 +10,11 @@ interface ScheduleWithAvailability extends Schedule {
   availableSpots: number;
 }
 
-const defaultImage =
-  "https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80";
+const defaultImages = [
+  "https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80",
+  "https://images.pexels.com/photos/2247179/pexels-photo-2247179.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+  "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80"
+];
 
 const Classes = () => {
   const [schedules, setSchedules] = useState<ScheduleWithAvailability[]>([]);
@@ -110,13 +113,13 @@ const Classes = () => {
                     className="bg-secondary animate-pulse rounded-lg h-96"
                   ></div>
                 ))
-            : featuredSchedules.map((schedule) => (
+            : featuredSchedules.map((schedule, index) => (
                 <div
                   key={schedule.id}
                   className="bg-secondary rounded-lg shadow-md overflow-hidden flex flex-col h-full"
                 >
                   <img
-                    src={defaultImage}
+                    src={defaultImages[index % defaultImages.length]}
                     alt={schedule.class.name}
                     className="w-full h-48 object-cover"
                   />
@@ -157,7 +160,7 @@ const Classes = () => {
                       </div>
                     </div>
                     <Link
-                      to={`/classes/${schedule.id}`}
+                      to={`/auth?type=member`}
                       className="bg-primary hover:bg-primary/80 text-black font-medium py-2 px-4 rounded-md text-center"
                     >
                       Book Now
@@ -278,7 +281,7 @@ const Classes = () => {
                 </div>
                 <div className="mt-4 flex justify-end">
                   <Link
-                    to={`/classes/${schedule.id}`}
+                    to={`/auth?type=member`}
                     className="bg-primary hover:bg-primary/80 text-black font-medium py-2 px-4 rounded-md"
                   >
                     Book Now
