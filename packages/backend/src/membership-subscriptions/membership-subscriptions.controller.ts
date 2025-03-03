@@ -8,12 +8,14 @@ import {
   Delete,
   UseGuards,
   Req,
+  ForbiddenException,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  //ApiParam,
 } from '@nestjs/swagger';
 import { MembershipSubscriptionsService } from './membership-subscriptions.service';
 import { CreateMembershipSubscriptionDto } from './dto/create-membership-subscription.dto';
@@ -23,11 +25,16 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../auth/enums/role.enum';
 import { Request } from 'express';
+//import { CurrentUser } from '../auth/decorators/current-user.decorator';
+//import { UserFromJwt } from '../auth/interfaces/user-from-jwt.interface';
+import { PaymentsService } from '../payments/payments.service';
+
 @ApiTags('membership-subscriptions')
 @Controller('membership-subscriptions')
 export class MembershipSubscriptionsController {
   constructor(
     private readonly subscriptionsService: MembershipSubscriptionsService,
+    private readonly paymentsService: PaymentsService,
   ) {}
 
   @Post()
@@ -150,5 +157,37 @@ export class MembershipSubscriptionsController {
   })
   decrementRemainingClasses(@Param('id') id: string) {
     return this.subscriptionsService.decrementRemainingClasses(+id);
+  }
+
+  @Post('/member/self/cancel')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.MEMBER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Cancel a membership subscription' })
+  @ApiResponse({
+    status: 200,
+    description: 'Subscription canceled successfully',
+  })
+  @ApiResponse({ status: 404, description: 'Subscription not found' })
+  async cancelSubscription(@Req() request: Request) {
+    const currentUser = request.user as Express.MemberTrainerUser;
+    const subscription = await this.subscriptionsService.findOne(
+      currentUser.id,
+    );
+
+    // Verify the subscription belongs to the current user or user is admin
+    if (subscription.member_id !== currentUser.id) {
+      throw new ForbiddenException('You cannot cancel this subscription');
+    }
+
+    // If there's a Stripe subscription ID, cancel in Stripe first
+    if (subscription.stripe_subscription_id) {
+      await this.paymentsService.cancelSubscription(
+        subscription.stripe_subscription_id,
+      );
+    }
+
+    // Then update our local record
+    return this.subscriptionsService.cancelSubscription(currentUser.id);
   }
 }

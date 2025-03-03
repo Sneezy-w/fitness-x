@@ -26,6 +26,11 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../auth/enums/role.enum';
 import { Request } from 'express';
+// import {
+//   CurrentUser,
+//   UserFromJwt,
+// } from '../auth/decorators/current-user.decorator';
+import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
 
 class CreatePaymentIntentDto {
   amount: number;
@@ -53,6 +58,29 @@ export class PaymentsController {
       createPaymentIntentDto.amount,
       createPaymentIntentDto.member_id,
       createPaymentIntentDto.description,
+    );
+  }
+
+  @Post('create-checkout')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Create a Stripe checkout session for subscription',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Checkout session created successfully',
+  })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiBody({ type: CreateCheckoutSessionDto })
+  createCheckoutSession(
+    @Body() createCheckoutSessionDto: CreateCheckoutSessionDto,
+    @Req() request: Request,
+  ) {
+    const currentUser = request.user as Express.MemberTrainerUser;
+    return this.paymentsService.createCheckoutSession(
+      createCheckoutSessionDto.membershipTypeId,
+      currentUser.id,
     );
   }
 

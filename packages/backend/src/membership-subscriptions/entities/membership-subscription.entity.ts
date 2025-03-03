@@ -31,14 +31,24 @@ export class MembershipSubscription {
   membership_type_id: number;
 
   @Column({ type: 'date' })
-  start_date: Date;
+  start_date: string;
 
   @Column({ type: 'date' })
-  end_date: Date;
+  end_date: string;
 
-  @Column()
+  @Column({ nullable: true })
   stripe_subscription_id: string;
 
   @Column()
   remaining_classes: number;
+
+  @Column({
+    type: 'enum',
+    enum: ['active', 'expired', 'canceled'],
+    default: 'active',
+  })
+  status: 'active' | 'expired' | 'canceled';
+
+  @Column({ default: true })
+  auto_renew: boolean;
 }

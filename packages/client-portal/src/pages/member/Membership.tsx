@@ -30,15 +30,15 @@ const membershipFeatures = [
 ];
 
 interface MembershipSubscription {
-  id: string;
-  membershipTypeId: string;
+  id: number;
+  membership_type_id: number;
   membershipType: MembershipType;
-  startDate: string;
-  expireDate: string;
+  start_date: string;
+  end_date: string;
   status: "active" | "expired" | "canceled";
-  remainingClasses: number;
-  autoRenew: boolean;
-  stripeSubscriptionId?: string;
+  remaining_classes: number;
+  auto_renew: boolean;
+  stripe_subscription_id?: string;
 }
 
 interface FreeClassAllocation {
@@ -60,7 +60,7 @@ const Membership = () => {
     membershipTypes: true,
     //freeClasses: true,
   });
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<number | null>(null);
   const [processingPayment, setProcessingPayment] = useState(false);
 
   useEffect(() => {
@@ -96,7 +96,7 @@ const Membership = () => {
       const typesWithActive = response.data.map(
         (type: MembershipType, index: number) => ({
           ...type,
-          isActive: currentMembership?.membershipTypeId === type.id,
+          isActive: currentMembership?.membership_type_id === type.id,
           features: membershipFeatures[index % membershipFeatures.length],
         })
       );
@@ -126,7 +126,7 @@ const Membership = () => {
   //   }
   // };
 
-  const handleSelectPlan = (membershipTypeId: string) => {
+  const handleSelectPlan = (membershipTypeId: number) => {
     setSelectedPlan(membershipTypeId);
   };
 
@@ -170,6 +170,8 @@ const Membership = () => {
   };
 
   const formatDate = (dateString: string) => {
+    //console.log(dateString);
+    //console.log(moment(dateString).format("MMMM D, YYYY"));
     return moment(dateString).format("MMMM D, YYYY");
   };
 
@@ -223,7 +225,7 @@ const Membership = () => {
                   <p className="text-gray-300">
                     {currentMembership.status === "active"
                       ? `Your membership is active until ${formatDate(
-                          currentMembership.expireDate
+                          currentMembership.end_date
                         )}`
                       : "Your membership has expired. Please renew to continue enjoying our services."}
                   </p>
@@ -237,9 +239,9 @@ const Membership = () => {
                   <h3 className="text-xl font-bold text-white">
                     {currentMembership.membershipType.name}
                   </h3>
-                  <p className="text-gray-400 mt-1">
+                  {/* <p className="text-gray-400 mt-1">
                     {currentMembership.membershipType.description}
-                  </p>
+                  </p> */}
                 </div>
                 <div className="mt-3 md:mt-0 text-right">
                   <p className="text-xl font-bold text-white">
@@ -261,7 +263,7 @@ const Membership = () => {
                   Remaining Classes
                 </h4>
                 <p className="text-2xl font-bold text-white">
-                  {currentMembership.remainingClasses}
+                  {currentMembership.remaining_classes}
                   <span className="text-sm font-normal text-gray-400">
                     /{currentMembership.membershipType.class_limit}
                   </span>
@@ -276,10 +278,10 @@ const Membership = () => {
                   Renewal Status
                 </h4>
                 <p className="text-gray-300">
-                  {currentMembership.autoRenew
+                  {currentMembership.auto_renew
                     ? "Auto-renews on "
                     : "Expires on "}
-                  {formatDate(currentMembership.expireDate)}
+                  {formatDate(currentMembership.end_date)}
                 </p>
               </div>
 
@@ -289,7 +291,7 @@ const Membership = () => {
                 </div>
                 <h4 className="text-white font-semibold mb-1">Started On</h4>
                 <p className="text-gray-300">
-                  {formatDate(currentMembership.startDate)}
+                  {formatDate(currentMembership.start_date)}
                 </p>
               </div>
             </div>
@@ -369,12 +371,12 @@ const Membership = () => {
                 className={`rounded-lg overflow-hidden border-2 ${
                   selectedPlan === membershipType.id
                     ? "border-primary"
-                    : membershipType.isActive
+                    : currentMembership?.membershipType.id === membershipType.id
                     ? "border-green-500"
                     : "border-gray-700"
                 } transition-all duration-300 hover:transform hover:scale-105 bg-neutral`}
               >
-                {membershipType.isActive && (
+                {currentMembership?.membershipType.id === membershipType.id && (
                   <div className="bg-green-600 text-white text-center py-1 text-sm font-semibold">
                     CURRENT PLAN
                   </div>
@@ -389,15 +391,15 @@ const Membership = () => {
                       /month
                     </span>
                   </p>
-                  <p className="text-gray-300 text-sm mb-4">
+                  {/* <p className="text-gray-300 text-sm mb-4">
                     {membershipType.description ||
                       "Premium membership with exclusive benefits"}
-                  </p>
+                  </p> */}
                   <p className="text-primary font-semibold mb-4">
                     {membershipType.class_limit} classes per month
                   </p>
                   <ul className="space-y-2 mb-6">
-                    {membershipType.features.map((feature, index) => (
+                    {membershipType.features?.map((feature, index) => (
                       <li
                         key={index}
                         className="flex items-center text-gray-300"
@@ -408,7 +410,7 @@ const Membership = () => {
                     ))}
                   </ul>
 
-                  {!membershipType.isActive && (
+                  {!currentMembership?.membershipType && (
                     <button
                       onClick={() => handleSelectPlan(membershipType.id)}
                       className={`w-full py-2 rounded ${

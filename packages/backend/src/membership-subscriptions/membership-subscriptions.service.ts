@@ -46,6 +46,15 @@ export class MembershipSubscriptionsService {
     });
   }
 
+  async findByStripeSubscriptionId(
+    stripeSubscriptionId: string,
+  ): Promise<MembershipSubscription[]> {
+    return this.subscriptionRepository.find({
+      where: { stripe_subscription_id: stripeSubscriptionId },
+      relations: ['member', 'membershipType'],
+    });
+  }
+
   async findCurrentSubscription(
     memberId: number,
   ): Promise<MembershipSubscription | null> {
@@ -54,8 +63,9 @@ export class MembershipSubscriptionsService {
     return this.subscriptionRepository.findOne({
       where: {
         member_id: memberId,
-        start_date: LessThanOrEqual(today),
-        end_date: MoreThanOrEqual(today),
+        start_date: LessThanOrEqual(today.toISOString().split('T')[0]),
+        end_date: MoreThanOrEqual(today.toISOString().split('T')[0]),
+        status: 'active',
       },
       relations: ['member', 'membershipType'],
     });
@@ -113,5 +123,34 @@ export class MembershipSubscriptionsService {
 
     subscription.remaining_classes -= 1;
     return this.subscriptionRepository.save(subscription);
+  }
+
+  async cancelSubscription(id: number): Promise<MembershipSubscription> {
+    const subscription = await this.findOne(id);
+
+    // Update subscription status to 'canceled' but keep it valid until the end date
+    subscription.status = 'canceled';
+    subscription.auto_renew = false;
+
+    return this.subscriptionRepository.save(subscription);
+  }
+
+  // Run this as a scheduled task to update expired subscriptions
+  async updateExpiredSubscriptions(): Promise<void> {
+    const today = new Date();
+
+    // Find all active subscriptions that have passed their end date
+    const expiredSubscriptions = await this.subscriptionRepository.find({
+      where: {
+        end_date: LessThanOrEqual(today.toISOString().split('T')[0]),
+        status: 'active',
+      },
+    });
+
+    // Update their status to 'expired'
+    for (const subscription of expiredSubscriptions) {
+      subscription.status = 'expired';
+      await this.subscriptionRepository.save(subscription);
+    }
   }
 }

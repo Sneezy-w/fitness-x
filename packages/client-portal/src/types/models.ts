@@ -60,6 +60,8 @@ export interface MembershipType {
   monthly_price: number;
   class_limit: number;
   is_active: boolean;
+  //description?: string;
+  features?: string[];
 }
 
 export interface MembershipSubscription {

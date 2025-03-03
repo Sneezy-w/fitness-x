@@ -1,4 +1,12 @@
-import { IsNotEmpty, IsNumber, IsDateString, IsString } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsDateString,
+  IsString,
+  IsBoolean,
+  IsOptional,
+  IsEnum,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateMembershipSubscriptionDto {
@@ -40,4 +48,18 @@ export class CreateMembershipSubscriptionDto {
   @IsNumber()
   @IsNotEmpty()
   remaining_classes: number;
+
+  // @ApiProperty({
+  //   description: 'Status of the subscription',
+  //   example: 'active',
+  // })
+  // @IsString()
+  // @IsNotEmpty()
+  @IsEnum(['active', 'expired', 'canceled'])
+  @IsOptional()
+  status: 'active' | 'expired' | 'canceled';
+
+  @IsBoolean()
+  @IsOptional()
+  auto_renew: boolean;
 }
