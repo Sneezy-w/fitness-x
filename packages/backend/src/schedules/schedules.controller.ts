@@ -28,7 +28,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../auth/enums/role.enum';
 import { Auth0AuthGuard } from 'src/auth/guards/auth0-auth.guard';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-
+import { Request } from 'express';
 @ApiTags('schedules')
 @Controller('schedules')
 export class SchedulesController {
@@ -191,5 +191,29 @@ export class SchedulesController {
   async getTrainerStats(@Req() request: Express.Request) {
     const currentUser = request.user as Express.MemberTrainerUser;
     return this.schedulesService.calculateTrainerStats(currentUser.id);
+  }
+
+  @Get('trainer/self/all')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.TRAINER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get all schedules for the authenticated trainer' })
+  @ApiResponse({ status: 200, description: 'List of trainer schedules' })
+  @ApiResponse({ status: 404, description: 'Trainer not found' })
+  async findAllForTrainer(@Req() request: Express.Request) {
+    const currentUser = request.user as Express.MemberTrainerUser;
+    return this.schedulesService.findByTrainerId(currentUser.id);
+  }
+
+  @Post('trainer/self/mark-attendance/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.TRAINER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Mark attendance for a schedule (trainer only)' })
+  @ApiResponse({ status: 200, description: 'Attendance marked successfully' })
+  @ApiResponse({ status: 404, description: 'Schedule not found' })
+  async markAttendance(@Param('id') id: string, @Req() request: Request) {
+    const currentUser = request.user as Express.MemberTrainerUser;
+    return this.schedulesService.markAttendance(+id, currentUser.id);
   }
 }

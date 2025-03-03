@@ -79,6 +79,13 @@ export class Schedule {
   })
   is_cancelled: boolean;
 
+  @Column({ default: false })
+  @ApiProperty({
+    description: 'Whether the schedule has attendance marked',
+    type: Boolean,
+  })
+  attendance_marked: boolean;
+
   @OneToMany(() => Booking, (booking) => booking.schedule)
   @ApiProperty({
     description: 'The bookings associated with the schedule',

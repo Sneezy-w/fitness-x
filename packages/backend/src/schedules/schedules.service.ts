@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  //UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between, MoreThanOrEqual } from 'typeorm';
@@ -10,6 +11,7 @@ import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { ClassesService } from '../classes/classes.service';
 import { TrainersService } from '../trainers/trainers.service';
+import { ApiException } from 'src/common/exceptions/api.exception';
 
 @Injectable()
 export class SchedulesService {
@@ -117,9 +119,12 @@ export class SchedulesService {
 
   async findByTrainerId(trainerId: number): Promise<Schedule[]> {
     return this.scheduleRepository.find({
-      where: { trainer_id: trainerId, is_cancelled: false },
-      relations: ['class', 'trainer'],
-      order: { start_time: 'ASC' },
+      where: { trainer_id: trainerId },
+      relations: ['class', 'trainer', 'bookings'],
+      order: {
+        date: 'DESC',
+        start_time: 'ASC',
+      },
     });
   }
 
@@ -336,5 +341,32 @@ export class SchedulesService {
       total_attendance,
       average_attendance_rate,
     };
+  }
+
+  async markAttendance(
+    scheduleId: number,
+    trainerId: number,
+  ): Promise<Schedule> {
+    const schedule = await this.findOne(scheduleId);
+
+    console.log(schedule);
+
+    // Verify that the trainer owns this schedule
+    if (schedule.trainer_id != trainerId) {
+      throw new ApiException(
+        'You can only mark attendance for your own classes',
+      );
+    }
+
+    // Check if the class date is in the past
+    const classDateTime = new Date(`${schedule.date}T${schedule.end_time}`);
+    if (new Date() < classDateTime) {
+      throw new ApiException(
+        'Cannot mark attendance for a class that has not ended yet',
+      );
+    }
+
+    schedule.attendance_marked = true;
+    return this.scheduleRepository.save(schedule);
   }
 }

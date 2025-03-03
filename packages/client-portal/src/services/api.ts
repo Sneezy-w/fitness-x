@@ -109,6 +109,14 @@ const mockResponses: Record<string, any> = {
 api.interceptors.response.use(
   (response) => {
     // NestJS typically returns data directly, no success field
+        //console.log("response", response);
+    //console.log("response", response);
+    if (!response.data?.success) {
+      toast.error(response.data.errorMessage);
+      return Promise.reject(Error(response.data.errorMessage));
+      //throw new Error(response.data.data.errorMessage);
+    }
+
     return response.data;
   },
   (error) => {

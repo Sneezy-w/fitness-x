@@ -26,6 +26,7 @@ interface ClassEvent {
   location: string;
   capacity: number;
   totalBookings: number;
+  attendanceMarked: boolean;
   resource?: Record<string, any>;
 }
 
@@ -76,24 +77,25 @@ const Classes = () => {
   const fetchTrainerClasses = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/schedules/trainer/all");
+      const response = await api.get("/schedules/trainer/self/all");
 
       // Process the data to fit the Calendar component
       const formattedEvents: ClassEvent[] = response.data.map(
         (cls: Record<string, any>) => {
-          const startDateTime = new Date(`${cls.date}T${cls.startTime}`);
-          const endDateTime = new Date(`${cls.date}T${cls.endTime}`);
+          const startDateTime = new Date(`${cls.date}T${cls.start_time}`);
+          const endDateTime = new Date(`${cls.date}T${cls.end_time}`);
 
           return {
             id: cls.id,
-            title: cls.className,
+            title: cls.class.name,
             start: startDateTime,
             end: endDateTime,
-            className: cls.className,
-            trainerName: cls.trainerName || user?.name || "",
+            className: cls.class.name,
+            trainerName: cls.trainer.full_name || user?.name || "",
             location: cls.location || "Main Studio",
             capacity: cls.capacity || 0,
-            totalBookings: cls.totalBookings || 0,
+            totalBookings: cls.bookings?.length || 0,
+            attendanceMarked: cls.attendance_marked || false,
             resource: cls,
           };
         }
@@ -120,7 +122,7 @@ const Classes = () => {
       trainerName: event.trainerName,
       capacity: event.capacity,
       totalBookings: event.totalBookings,
-      attendanceMarked: event.resource?.attendanceMarked || false,
+      attendanceMarked: event.attendanceMarked,
     };
 
     setSelectedEvent(classDetail);
@@ -141,7 +143,7 @@ const Classes = () => {
 
     try {
       // Call the API to mark attendance
-      await api.post(`/schedules/${selectedEvent.id}/attendance`);
+      await api.post(`/schedules/trainer/self/mark-attendance/${selectedEvent.id}`);
       toast.success("Attendance marked successfully");
 
       // Refresh the data
@@ -149,7 +151,7 @@ const Classes = () => {
       setShowEventDetails(false);
     } catch (error) {
       console.error("Error marking attendance:", error);
-      toast.error("Failed to mark attendance. Please try again.");
+      //toast.error("Failed to mark attendance. Please try again.");
     }
   };
 
