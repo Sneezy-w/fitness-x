@@ -48,8 +48,7 @@ const Dashboard = () => {
       try {
         // Get trainer approval status
         const profileResponse = await api.get("/auth/self/trainer/profile");
-        console.log("profileResponse", profileResponse);
-
+        
         if (!profileResponse.data.is_approved) {
           return; // Don't load other data if not approved
         } else {
@@ -57,9 +56,23 @@ const Dashboard = () => {
         }
 
         // Fetch today's classes
-        // setLoading((prev) => ({ ...prev, today: true }));
-        // const todayResponse = await api.get("/schedules/trainer/today");
-        // setTodayClasses(todayResponse.data);
+        setLoading((prev) => ({ ...prev, today: true }));
+        // Using the correct endpoint for trainer's schedules
+        const todayResponse = await api.get("/schedules/trainer/self/current");
+        
+        // Transform backend data to match frontend expected format
+        const formattedTodayClasses = todayResponse.data.map((schedule: any) => ({
+          id: schedule.id.toString(),
+          classId: schedule.class.id.toString(),
+          date: schedule.date,
+          startTime: schedule.start_time,
+          endTime: schedule.end_time,
+          className: schedule.class.name,
+          totalBookings: schedule.bookings ? schedule.bookings.length : 0,
+          capacity: schedule.capacity
+        }));
+        
+        setTodayClasses(formattedTodayClasses);
       } catch (error) {
         console.error(
           "Error fetching trainer profile or today's classes:",
@@ -72,9 +85,23 @@ const Dashboard = () => {
 
       try {
         // Fetch upcoming classes
-        // setLoading((prev) => ({ ...prev, upcoming: true }));
-        // const upcomingResponse = await api.get("/schedules/trainer/upcoming");
-        // setUpcomingClasses(upcomingResponse.data);
+        setLoading((prev) => ({ ...prev, upcoming: true }));
+        // Using the correct endpoint for trainer's upcoming schedules
+        const upcomingResponse = await api.get("/schedules/trainer/self/upcoming");
+        
+        // Transform backend data to match frontend expected format
+        const formattedUpcomingClasses = upcomingResponse.data.map((schedule: any) => ({
+          id: schedule.id.toString(),
+          classId: schedule.class.id.toString(),
+          date: schedule.date,
+          startTime: schedule.start_time,
+          endTime: schedule.end_time,
+          className: schedule.class.name,
+          totalBookings: schedule.bookings ? schedule.bookings.length : 0,
+          capacity: schedule.capacity
+        }));
+        
+        setUpcomingClasses(formattedUpcomingClasses);
       } catch (error) {
         console.error("Error fetching upcoming classes:", error);
         toast.error("Failed to load your upcoming classes");
@@ -84,14 +111,24 @@ const Dashboard = () => {
 
       try {
         // Fetch attendance stats
-        // setLoading((prev) => ({ ...prev, stats: true }));
-        // const statsResponse = await api.get(
-        //   "/schedules/trainer/attendance-stats"
-        // );
-        // setAttendanceStats(statsResponse.data);
+        setLoading((prev) => ({ ...prev, stats: true }));
+        // Using a mock endpoint for now - this would need to be implemented on the backend
+        const statsResponse = await api.get("/schedules/trainer/self/stats");
+        
+        // If the backend returns data in a different format, transform it here
+        setAttendanceStats({
+          totalClasses: statsResponse.data.total_classes || 0,
+          totalAttendance: statsResponse.data.total_attendance || 0,
+          averageAttendanceRate: statsResponse.data.average_attendance_rate || 0
+        });
       } catch (error) {
         console.error("Error fetching attendance stats:", error);
-        // Not showing toast for stats as it's less critical
+        // Create default stats since this endpoint might not exist yet
+        setAttendanceStats({
+          totalClasses: 0,
+          totalAttendance: 0,
+          averageAttendanceRate: 0
+        });
       } finally {
         setLoading((prev) => ({ ...prev, stats: false }));
       }

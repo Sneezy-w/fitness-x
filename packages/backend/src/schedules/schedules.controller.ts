@@ -10,6 +10,7 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -26,6 +27,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../auth/enums/role.enum';
 import { Auth0AuthGuard } from 'src/auth/guards/auth0-auth.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @ApiTags('schedules')
 @Controller('schedules')
@@ -151,5 +153,43 @@ export class SchedulesController {
   })
   findAvailable() {
     return this.schedulesService.findUpcoming();
+  }
+
+  @Get('trainer/self/current')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.TRAINER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get current day schedules for trainer' })
+  @ApiResponse({ status: 200, description: "Returns today's schedules" })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  async getTrainerCurrentSchedules(@Req() request: Express.Request) {
+    const currentUser = request.user as Express.MemberTrainerUser;
+    return this.schedulesService.findCurrentSchedulesForTrainer(currentUser.id);
+  }
+
+  @Get('trainer/self/upcoming')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.TRAINER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get upcoming schedules for trainer' })
+  @ApiResponse({ status: 200, description: 'Returns upcoming schedules' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  async getTrainerUpcomingSchedules(@Req() request: Express.Request) {
+    const currentUser = request.user as Express.MemberTrainerUser;
+    return this.schedulesService.findUpcomingSchedulesForTrainer(
+      currentUser.id,
+    );
+  }
+
+  @Get('trainer/self/stats')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.TRAINER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get statistics for trainer schedules' })
+  @ApiResponse({ status: 200, description: 'Returns trainer statistics' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  async getTrainerStats(@Req() request: Express.Request) {
+    const currentUser = request.user as Express.MemberTrainerUser;
+    return this.schedulesService.calculateTrainerStats(currentUser.id);
   }
 }

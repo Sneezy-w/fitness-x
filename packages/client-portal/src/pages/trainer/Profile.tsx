@@ -12,49 +12,55 @@ import {
 } from "react-icons/fi";
 import api from "../../services/api";
 import toast from "react-hot-toast";
+import { useAuth } from "../../contexts/AuthContext";
 
 interface TrainerProfile {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
+  id: number;
+  full_name: string;
+  //email: string;
+  //phone: string;
   specialization: string;
-  experience: string;
-  bio?: string;
-  status: "pending" | "approved" | "rejected";
-  rejectionReason?: string;
+  experience_years: number;
+  //bio?: string;
+  //status: "pending" | "approved" | "rejected";
+  //rejection_reason?: string;
+  is_approved: boolean;
 }
 
 const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState<TrainerProfile | null>(null);
-
+  const { checkAuth } = useAuth();
   const validationSchema = Yup.object({
-    name: Yup.string().required("Name is required"),
-    email: Yup.string()
-      .email("Invalid email address")
-      .required("Email is required"),
-    phone: Yup.string().required("Phone number is required"),
+    full_name: Yup.string().required("Name is required"),
+    // email: Yup.string()
+    //   .email("Invalid email address")
+    //   .required("Email is required"),
+    //phone: Yup.string().required("Phone number is required"),
     specialization: Yup.string().required("Specialization is required"),
-    experience: Yup.string().required("Experience is required"),
-    bio: Yup.string(),
+    experience_years: Yup.number().min(0, "Experience must be at least 0").required("Experience is required"),
+    //bio: Yup.string(),
   });
 
   const formik = useFormik({
     initialValues: {
-      name: "",
-      email: "",
-      phone: "",
+      full_name: "",
+      //email: "",
+      //phone: "",
       specialization: "",
-      experience: "",
-      bio: "",
+      experience_years: 0,
+      //bio: "",
     },
     validationSchema,
     onSubmit: async (values) => {
       try {
         setSaving(true);
-        await api.put("/trainers/profile", values);
+        const response = await api.patch("/auth/self/trainer/profile", values);
+        const token = response.data.access_token;
+        localStorage.setItem("token", token);
+        await checkAuth();
+        //window.location.href = "/";
         toast.success("Profile updated successfully");
 
         // Refresh profile data
@@ -71,19 +77,19 @@ const Profile = () => {
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/trainers/profile");
+      const response = await api.get("/auth/self/trainer/profile");
       const profileData: TrainerProfile = response.data;
 
       setProfile(profileData);
 
       // Update form values
       formik.setValues({
-        name: profileData.name,
-        email: profileData.email,
-        phone: profileData.phone,
+        full_name: profileData.full_name,
+        //email: profileData.email,
+        //phone: profileData.phone,
         specialization: profileData.specialization,
-        experience: profileData.experience,
-        bio: profileData.bio || "",
+        experience_years: profileData.experience_years,
+        //bio: profileData.bio || "",
       });
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -108,46 +114,34 @@ const Profile = () => {
       {profile && (
         <div
           className={`mb-8 p-4 rounded-lg ${
-            profile.status === "approved"
+            profile.is_approved
               ? "bg-green-900/20 border border-green-700"
-              : profile.status === "rejected"
-              ? "bg-red-900/20 border border-red-700"
               : "bg-yellow-900/20 border border-yellow-700"
           }`}
         >
           <div className="flex items-start">
             <div
               className={`p-2 rounded-full mr-4 ${
-                profile.status === "approved"
+                profile.is_approved
                   ? "text-green-500"
-                  : profile.status === "rejected"
-                  ? "text-red-500"
-                  : "text-yellow-500"
+                  : "text-red-500"
               }`}
             >
-              {profile.status === "approved" ? (
+              {profile.is_approved ? (
                 <FiCheckCircle size={24} />
-              ) : profile.status === "rejected" ? (
-                <FiAlertCircle size={24} />
               ) : (
                 <FiAlertCircle size={24} />
               )}
             </div>
             <div>
               <h3 className="text-lg font-semibold text-white">
-                {profile.status === "approved"
+                {profile.is_approved
                   ? "Approved Trainer"
-                  : profile.status === "rejected"
-                  ? "Application Rejected"
                   : "Approval Pending"}
               </h3>
               <p className="text-gray-300">
-                {profile.status === "approved"
+                {profile.is_approved
                   ? "Your trainer account is approved. You can view and manage your classes."
-                  : profile.status === "rejected"
-                  ? `Your application was rejected: ${
-                      profile.rejectionReason || "No specific reason provided."
-                    }`
                   : "Your application is under review. You will be notified once approved."}
               </p>
             </div>
@@ -178,25 +172,25 @@ const Profile = () => {
                 </div>
                 <input
                   type="text"
-                  name="name"
+                  name="full_name"
                   className={`w-full pl-10 pr-3 py-2 rounded-md bg-neutral text-white border ${
-                    formik.errors.name && formik.touched.name
+                    formik.errors.full_name && formik.touched.full_name
                       ? "border-red-500"
                       : "border-gray-600"
                   }`}
-                  value={formik.values.name}
+                  value={formik.values.full_name}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                 />
               </div>
-              {formik.errors.name && formik.touched.name && (
+              {formik.errors.full_name && formik.touched.full_name && (
                 <p className="text-red-500 text-xs mt-1">
-                  {formik.errors.name}
+                  {formik.errors.full_name}
                 </p>
               )}
             </div>
 
-            <div>
+            {/* <div>
               <label className="block text-white text-sm font-semibold mb-2">
                 Email Address
               </label>
@@ -226,9 +220,9 @@ const Profile = () => {
               <p className="text-gray-400 text-xs mt-1">
                 Email address cannot be changed.
               </p>
-            </div>
+            </div> */}
 
-            <div>
+            {/* <div>
               <label className="block text-white text-sm font-semibold mb-2">
                 Phone Number
               </label>
@@ -254,7 +248,7 @@ const Profile = () => {
                   {formik.errors.phone}
                 </p>
               )}
-            </div>
+            </div> */}
 
             <div>
               <label className="block text-white text-sm font-semibold mb-2">
@@ -296,27 +290,27 @@ const Profile = () => {
                   <FiBriefcase />
                 </div>
                 <input
-                  type="text"
-                  name="experience"
+                  type="number"
+                  name="experience_years"
                   placeholder="e.g., 3 years"
                   className={`w-full pl-10 pr-3 py-2 rounded-md bg-neutral text-white border ${
-                    formik.errors.experience && formik.touched.experience
+                    formik.errors.experience_years && formik.touched.experience_years
                       ? "border-red-500"
                       : "border-gray-600"
                   }`}
-                  value={formik.values.experience}
+                  value={formik.values.experience_years}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                 />
               </div>
-              {formik.errors.experience && formik.touched.experience && (
+              {formik.errors.experience_years && formik.touched.experience_years && (
                 <p className="text-red-500 text-xs mt-1">
-                  {formik.errors.experience}
+                  {formik.errors.experience_years}
                 </p>
               )}
             </div>
 
-            <div>
+            {/* <div>
               <label className="block text-white text-sm font-semibold mb-2">
                 Bio (Optional)
               </label>
@@ -340,7 +334,7 @@ const Profile = () => {
                 A good bio helps members understand your expertise and teaching
                 style.
               </p>
-            </div>
+            </div> */}
 
             <div>
               <button

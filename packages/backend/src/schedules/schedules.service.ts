@@ -251,4 +251,90 @@ export class SchedulesService {
       isBooked: false, // Default to false as we can't check without proper repository
     }));
   }
+
+  async findCurrentSchedulesForTrainer(trainerId: number): Promise<Schedule[]> {
+    const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+
+    return this.scheduleRepository.find({
+      where: {
+        trainer_id: trainerId,
+        date: today,
+        is_cancelled: false,
+      },
+      relations: ['class', 'trainer', 'bookings', 'bookings.member'],
+      order: {
+        start_time: 'ASC',
+      },
+    });
+  }
+
+  async findUpcomingSchedulesForTrainer(
+    trainerId: number,
+  ): Promise<Schedule[]> {
+    const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+
+    return this.scheduleRepository
+      .createQueryBuilder('schedule')
+      .leftJoinAndSelect('schedule.class', 'class')
+      .leftJoinAndSelect('schedule.trainer', 'trainer')
+      .leftJoinAndSelect('schedule.bookings', 'bookings')
+      .leftJoinAndSelect('bookings.member', 'member')
+      .where('schedule.trainer_id = :trainerId', { trainerId })
+      .andWhere(
+        '(schedule.date > :today OR (schedule.date = :today AND schedule.start_time > :now))',
+        {
+          today,
+          now: new Date().toTimeString().split(' ')[0], // Current time in HH:MM:SS format
+        },
+      )
+      .andWhere('schedule.is_cancelled = false')
+      .orderBy('schedule.date', 'ASC')
+      .addOrderBy('schedule.start_time', 'ASC')
+      .take(20) // Limit to next 20 upcoming classes
+      .getMany();
+  }
+
+  async calculateTrainerStats(trainerId: number): Promise<{
+    total_classes: number;
+    total_attendance: number;
+    average_attendance_rate: number;
+  }> {
+    // Get schedules from the last 30 days
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().split('T')[0];
+    const today = new Date().toISOString().split('T')[0];
+
+    const schedules = await this.scheduleRepository.find({
+      where: {
+        trainer_id: trainerId,
+        date: Between(thirtyDaysAgoStr, today),
+        is_cancelled: false,
+      },
+      relations: ['bookings'],
+    });
+
+    const total_classes = schedules.length;
+    const total_attendance = schedules.reduce(
+      (sum, schedule) =>
+        sum + schedule.bookings.filter((booking) => booking.is_attended).length,
+      0,
+    );
+
+    const total_bookings = schedules.reduce(
+      (sum, schedule) => sum + schedule.bookings.length,
+      0,
+    );
+
+    const average_attendance_rate =
+      total_bookings > 0
+        ? Math.round((total_attendance / total_bookings) * 100)
+        : 0;
+
+    return {
+      total_classes,
+      total_attendance,
+      average_attendance_rate,
+    };
+  }
 }

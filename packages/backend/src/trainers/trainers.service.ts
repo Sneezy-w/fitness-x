@@ -10,6 +10,7 @@ import { Trainer } from './entities/trainer.entity';
 import { CreateTrainerDto } from './dto/create-trainer.dto';
 import { UpdateTrainerDto } from './dto/update-trainer.dto';
 import { ApiException } from 'src/common/exceptions/api.exception';
+import { UpdateTrainerProfileDto } from './dto/update-trainer-profile.dto';
 
 @Injectable()
 export class TrainersService {
@@ -87,6 +88,15 @@ export class TrainersService {
 
     // Update the trainer with the provided data
     Object.assign(trainer, updateTrainerDto);
+    return this.trainersRepository.save(trainer);
+  }
+
+  async updateProfile(
+    id: number,
+    updateTrainerProfileDto: UpdateTrainerProfileDto,
+  ): Promise<Trainer> {
+    const trainer = await this.findOne(id);
+    Object.assign(trainer, updateTrainerProfileDto);
     return this.trainersRepository.save(trainer);
   }
 

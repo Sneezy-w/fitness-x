@@ -33,6 +33,8 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { UpdateMemberProfileDto } from 'src/members/dto/update-member-profile.dto';
 //import { UpdateTrainerDto } from 'src/trainers/dto/update-trainer.dto';
+import { UpdateTrainerProfileDto } from 'src/trainers/dto/update-trainer-profile.dto';
+//import { UpdateTrainerDto } from 'src/trainers/dto/update-trainer.dto';
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
@@ -151,7 +153,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Member updated successfully' })
   @ApiResponse({ status: 404, description: 'Member not found' })
   @ApiResponse({ status: 400, description: 'Bad request' })
-  async updateSelfProfile(
+  async updateMemberProfile(
     @Req() request: Express.Request,
     @Body() updateMemberProfileDto: UpdateMemberProfileDto,
   ) {
@@ -182,22 +184,28 @@ export class AuthController {
     return this.trainersService.findOne(currentUser.id);
   }
 
-  // @Patch('self/trainer/profile')
-  // @UseGuards(JwtAuthGuard, RolesGuard)
-  // @Roles(Role.TRAINER)
-  // @ApiBearerAuth()
-  // @ApiOperation({ summary: 'Update a trainer' })
-  // @ApiResponse({ status: 200, description: 'Trainer updated successfully' })
-  // @ApiResponse({ status: 404, description: 'Trainer not found' })
-  // async updateSelfProfile(
-  //   @Req() request: Express.Request,
-  //   @Body() updateTrainerDto: UpdateTrainerDto,
-  // ) {
-  //   const currentUser = request.user as Express.MemberTrainerUser;
-  //   const trainer = await this.trainersService.updateProfile(
-  //     currentUser.id,
-  //     updateTrainerDto,
-  //   );
-  //   return trainer;
-  // }
+  @Patch('self/trainer/profile')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.TRAINER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update a trainer' })
+  @ApiResponse({ status: 200, description: 'Trainer updated successfully' })
+  @ApiResponse({ status: 404, description: 'Trainer not found' })
+  async updateTrainerProfile(
+    @Req() request: Express.Request,
+    @Body() updateTrainerProfileDto: UpdateTrainerProfileDto,
+  ) {
+    const currentUser = request.user as Express.MemberTrainerUser;
+    const trainer = await this.trainersService.updateProfile(
+      currentUser.id,
+      updateTrainerProfileDto,
+    );
+    const token = this.authService.generateJwtToken({
+      email: trainer.email,
+      id: trainer.id.toString(),
+      role: Role.TRAINER,
+      name: trainer.full_name,
+    });
+    return token;
+  }
 }
