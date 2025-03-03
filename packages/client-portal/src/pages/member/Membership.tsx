@@ -52,13 +52,13 @@ const Membership = () => {
   const [currentMembership, setCurrentMembership] =
     useState<MembershipSubscription | null>(null);
   const [membershipTypes, setMembershipTypes] = useState<MembershipType[]>([]);
-  const [freeClasses, setFreeClasses] = useState<FreeClassAllocation | null>(
-    null
-  );
+  // const [freeClasses, setFreeClasses] = useState<FreeClassAllocation | null>(
+  //   null
+  // );
   const [loading, setLoading] = useState({
     membership: true,
     membershipTypes: true,
-    freeClasses: true,
+    //freeClasses: true,
   });
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [processingPayment, setProcessingPayment] = useState(false);
@@ -66,13 +66,15 @@ const Membership = () => {
   useEffect(() => {
     fetchCurrentMembership();
     fetchMembershipTypes();
-    fetchFreeClassAllocations();
+    //fetchFreeClassAllocations();
   }, []);
 
   const fetchCurrentMembership = async () => {
     try {
       setLoading((prev) => ({ ...prev, membership: true }));
-      const response = await api.get("/membership-subscriptions/current");
+      const response = await api.get(
+        "/membership-subscriptions/member/current"
+      );
 
       if (response.data) {
         setCurrentMembership(response.data);
@@ -108,21 +110,21 @@ const Membership = () => {
     }
   };
 
-  const fetchFreeClassAllocations = async () => {
-    try {
-      setLoading((prev) => ({ ...prev, freeClasses: true }));
-      const response = await api.get("/free-class-allocations/current");
+  // const fetchFreeClassAllocations = async () => {
+  //   try {
+  //     setLoading((prev) => ({ ...prev, freeClasses: true }));
+  //     const response = await api.get("/free-class-allocations/current");
 
-      if (response.data?.remainingClasses > 0) {
-        setFreeClasses(response.data);
-      }
-    } catch (error) {
-      console.error("Error fetching free class allocations:", error);
-      // Don't show error toast as it's normal for users to not have free classes
-    } finally {
-      setLoading((prev) => ({ ...prev, freeClasses: false }));
-    }
-  };
+  //     if (response.data?.remainingClasses > 0) {
+  //       setFreeClasses(response.data);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching free class allocations:", error);
+  //     // Don't show error toast as it's normal for users to not have free classes
+  //   } finally {
+  //     setLoading((prev) => ({ ...prev, freeClasses: false }));
+  //   }
+  // };
 
   const handleSelectPlan = (membershipTypeId: string) => {
     setSelectedPlan(membershipTypeId);
@@ -318,7 +320,7 @@ const Membership = () => {
       </div>
 
       {/* Free Classes Section */}
-      {freeClasses && freeClasses.remainingClasses > 0 && (
+      {/* {freeClasses && freeClasses.remainingClasses > 0 && (
         <div className="bg-secondary rounded-lg p-6 shadow-md mb-8">
           <h2 className="text-xl font-bold text-white mb-4">Free Classes</h2>
           <div className="bg-neutral p-4 rounded-lg">
@@ -344,7 +346,7 @@ const Membership = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Membership Plans Section */}
       <div className="bg-secondary rounded-lg p-6 shadow-md">
