@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import { Repository, LessThanOrEqual, MoreThanOrEqual, In } from 'typeorm';
 import { MembershipSubscription } from './entities/membership-subscription.entity';
 import { CreateMembershipSubscriptionDto } from './dto/create-membership-subscription.dto';
 import { UpdateMembershipSubscriptionDto } from './dto/update-membership-subscription.dto';
@@ -65,7 +65,7 @@ export class MembershipSubscriptionsService {
         member_id: memberId,
         start_date: LessThanOrEqual(today.toISOString().split('T')[0]),
         end_date: MoreThanOrEqual(today.toISOString().split('T')[0]),
-        status: 'active',
+        status: In(['active', 'canceled']),
       },
       relations: ['member', 'membershipType'],
     });

@@ -15,6 +15,7 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiParam,
   //ApiParam,
 } from '@nestjs/swagger';
 import { MembershipSubscriptionsService } from './membership-subscriptions.service';
@@ -159,24 +160,26 @@ export class MembershipSubscriptionsController {
     return this.subscriptionsService.decrementRemainingClasses(+id);
   }
 
-  @Post('/member/self/cancel')
+  @Post('/:id/member/cancel')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.MEMBER)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Cancel a membership subscription' })
+  @ApiParam({ name: 'id', description: 'The ID of the subscription to cancel' })
   @ApiResponse({
     status: 200,
     description: 'Subscription canceled successfully',
   })
   @ApiResponse({ status: 404, description: 'Subscription not found' })
-  async cancelSubscription(@Req() request: Request) {
+  async cancelSubscription(@Param('id') id: string, @Req() request: Request) {
     const currentUser = request.user as Express.MemberTrainerUser;
-    const subscription = await this.subscriptionsService.findOne(
-      currentUser.id,
-    );
+    const subscription = await this.subscriptionsService.findOne(+id);
+
+    console.log(subscription);
+    console.log(currentUser);
 
     // Verify the subscription belongs to the current user or user is admin
-    if (subscription.member_id !== currentUser.id) {
+    if (subscription.member_id != currentUser.id) {
       throw new ForbiddenException('You cannot cancel this subscription');
     }
 
@@ -188,6 +191,6 @@ export class MembershipSubscriptionsController {
     }
 
     // Then update our local record
-    return this.subscriptionsService.cancelSubscription(currentUser.id);
+    return this.subscriptionsService.cancelSubscription(subscription.id);
   }
 }

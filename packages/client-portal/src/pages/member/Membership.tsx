@@ -155,7 +155,7 @@ const Membership = () => {
 
     try {
       await api.post(
-        `/membership-subscriptions/${currentMembership.id}/cancel`
+        `/membership-subscriptions/${currentMembership.id}/member/cancel`
       );
       toast.success(
         "Your membership has been canceled. It will remain active until the end of your billing period."
