@@ -52,13 +52,16 @@ export async function deleteSchedule(id: number) {
 
 /** Get upcoming schedules */
 export async function getUpcomingSchedules(options?: Record<string, any>) {
-  return request<API.R<API.Service.Schedule[]>>('/api/schedules/upcoming', {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
+  return request<API.R<API.Service.Schedule[]>>(
+    '/api/schedules/public/upcoming',
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      ...(options || {}),
     },
-    ...(options || {}),
-  });
+  );
 }
 
 /** Get schedules by date range */

@@ -4,27 +4,44 @@ import { FiCalendar, FiClock, FiCreditCard, FiBarChart2 } from "react-icons/fi";
 import api from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
 import toast from "react-hot-toast";
+import { MembershipType } from "../../types/models";
+import moment from "moment";
 
 interface Booking {
-  id: string;
-  scheduleId: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  className: string;
-  trainerName: string;
+  id: number;
+  schedule_id: number;
+  is_attended: boolean;
+  schedule: {
+    id: number;
+    capacity: number;
+    date: string;
+    start_time: string;
+    end_time: string;
+    class: {
+      name: string;
+      description: string;
+    };
+    trainer: {
+      full_name: string;
+    };
+  };
+  // date: string;
+  // start_time: string;
+  // end_time: string;
 }
 
 interface Membership {
-  id: string;
-  name: string;
-  price: number;
-  classesPerMonth: number;
-  remainingClasses: number;
-  expireDate: string;
-  startDate: string;
-  status: "active" | "expired";
+  id: number;
+  membership_type_id: number;
+  membershipType: MembershipType;
+  start_date: string;
+  end_date: string;
+  status: "active" | "expired" | "canceled";
+  remaining_classes: number;
+  auto_renew: boolean;
+  stripe_subscription_id?: string;
 }
+
 
 interface ClassStat {
   name: string;
@@ -105,12 +122,7 @@ const Dashboard = () => {
   };
 
   const formatTime = (timeString: string) => {
-    const date = new Date(timeString);
-    return date.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
+    return moment(timeString, "HH:mm").format("h:mm A");
   };
 
   return (
@@ -144,9 +156,9 @@ const Dashboard = () => {
           ) : (
             <div>
               <p className="text-3xl font-bold text-white">
-                {membership?.remainingClasses || 0}
+                {membership?.remaining_classes || 0}
                 <span className="text-sm text-gray-400 ml-2">
-                  / {membership?.classesPerMonth || 0}
+                  / {membership?.membershipType.class_limit || 0}
                 </span>
               </p>
               {/* {freeClasses > 0 && (
@@ -173,7 +185,7 @@ const Dashboard = () => {
             <div className="animate-pulse h-10 bg-gray-700 rounded"></div>
           ) : membership ? (
             <div>
-              <p className="text-xl font-bold text-white">{membership.name}</p>
+              <p className="text-xl font-bold text-white">{membership.membershipType.name}</p>
               <p
                 className={`text-sm ${
                   membership.status === "active"
@@ -181,11 +193,17 @@ const Dashboard = () => {
                     : "text-red-500"
                 } mt-1`}
               >
-                {membership.status === "active" ? "Active" : "Expired"}
-                {membership.status === "active" && membership.expireDate && (
+                {membership.status}
+                {membership.status === "active" && membership.auto_renew && membership.end_date && (
                   <span className="text-gray-400">
                     {" "}
-                    · Renews {formatDate(membership.expireDate)}
+                    · Renews {formatDate(membership.end_date)}
+                  </span>
+                )}
+                {membership.status === "canceled" && (
+                  <span className="text-gray-400">
+                    {" "}
+                    · Ended on {formatDate(membership.end_date)}
                   </span>
                 )}
               </p>
@@ -294,10 +312,10 @@ const Dashboard = () => {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-white">
-                      {booking.className}
+                      {booking.schedule.class.name}
                     </h3>
                     <p className="text-sm text-gray-400">
-                      with {booking.trainerName}
+                      with {booking.schedule.trainer.full_name}
                     </p>
                   </div>
                 </div>
@@ -305,14 +323,14 @@ const Dashboard = () => {
                   <div className="flex items-center mr-6">
                     <FiCalendar className="text-gray-400 mr-2" />
                     <span className="text-sm text-gray-300">
-                      {formatDate(booking.date)}
+                      {formatDate(booking.schedule.date)}
                     </span>
                   </div>
                   <div className="flex items-center">
                     <FiClock className="text-gray-400 mr-2" />
                     <span className="text-sm text-gray-300">
-                      {formatTime(booking.startTime)} -{" "}
-                      {formatTime(booking.endTime)}
+                      {formatTime(booking.schedule.start_time)} -{" "}
+                      {formatTime(booking.schedule.end_time)}
                     </span>
                   </div>
                 </div>

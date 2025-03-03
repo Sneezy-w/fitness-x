@@ -72,21 +72,21 @@ export class BookingsController {
     return this.bookingsService.findAll();
   }
 
-  @Get('member')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({
-    summary: 'Get all bookings for the current authenticated member',
-  })
-  @ApiResponse({ status: 200, description: 'List of member bookings' })
-  @ApiResponse({ status: 404, description: 'Member not found' })
-  findMemberBookings(@Req() request: Request) {
-    const currentUser = request.user as Express.MemberTrainerUser;
-    if (!currentUser) {
-      throw new UnauthorizedException('User not found');
-    }
-    return this.bookingsService.findByMemberId(currentUser.id);
-  }
+  // @Get('member')
+  // @UseGuards(JwtAuthGuard)
+  // @ApiBearerAuth()
+  // @ApiOperation({
+  //   summary: 'Get all bookings for the current authenticated member',
+  // })
+  // @ApiResponse({ status: 200, description: 'List of member bookings' })
+  // @ApiResponse({ status: 404, description: 'Member not found' })
+  // findMemberBookings(@Req() request: Request) {
+  //   const currentUser = request.user as Express.MemberTrainerUser;
+  //   if (!currentUser) {
+  //     throw new UnauthorizedException('User not found');
+  //   }
+  //   return this.bookingsService.findByMemberId(currentUser.id);
+  // }
 
   @Get(':memberId/member')
   @UseGuards(JwtAuthGuard)
@@ -124,6 +124,23 @@ export class BookingsController {
       throw new UnauthorizedException('User not found');
     }
     return this.bookingsService.findMemberUpcomingBookings(currentUser.id);
+  }
+
+  @Get('member/all')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.MEMBER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get upcoming bookings for a member' })
+  @ApiResponse({ status: 200, description: 'List of upcoming member bookings' })
+  @ApiResponse({ status: 404, description: 'Member not found' })
+  findMemberAllBookings(@Req() request: Request) {
+    //console.log('request', request);
+    const currentUser = request.user as Express.MemberTrainerUser;
+    //console.log('currentUser', currentUser);
+    if (!currentUser) {
+      throw new UnauthorizedException('User not found');
+    }
+    return this.bookingsService.findByMemberId(currentUser.id);
   }
 
   @Get('schedule/:scheduleId')

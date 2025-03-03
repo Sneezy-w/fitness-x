@@ -131,23 +131,25 @@ export class BookingsService {
   async findMemberUpcomingBookings(memberId: number): Promise<Booking[]> {
     //console.log('memberId', memberId);
     const now = new Date();
-    return this.bookingRepository
-      .createQueryBuilder('booking')
-      .innerJoinAndSelect('booking.schedule', 'schedule')
-      .innerJoinAndSelect('schedule.class', 'class')
-      .innerJoinAndSelect('schedule.trainer', 'trainer')
-      .innerJoinAndSelect('booking.member', 'member')
-      .where('booking.member_id = :memberId', { memberId })
-      .andWhere('schedule.date >= :now', {
-        now: now.toISOString().split('T')[0],
-      })
-      .andWhere('schedule.start_time >= :now', {
-        now: now.toISOString().split('T')[1],
-      })
-      .andWhere('schedule.is_cancelled = false')
-      .orderBy('schedule.date', 'ASC')
-      .orderBy('schedule.start_time', 'ASC')
-      .getMany();
+    return (
+      this.bookingRepository
+        .createQueryBuilder('booking')
+        .innerJoinAndSelect('booking.schedule', 'schedule')
+        .innerJoinAndSelect('schedule.class', 'class')
+        .innerJoinAndSelect('schedule.trainer', 'trainer')
+        .innerJoinAndSelect('booking.member', 'member')
+        .where('booking.member_id = :memberId', { memberId })
+        .andWhere('schedule.date >= :now', {
+          now: now.toISOString().split('T')[0],
+        })
+        // .andWhere('schedule.start_time >= :now', {
+        //   now: now.toISOString().split('T')[1],
+        // })
+        .andWhere('schedule.is_cancelled = false')
+        .orderBy('schedule.date', 'ASC')
+        .orderBy('schedule.start_time', 'ASC')
+        .getMany()
+    );
   }
 
   async findByScheduleId(scheduleId: number): Promise<Booking[]> {

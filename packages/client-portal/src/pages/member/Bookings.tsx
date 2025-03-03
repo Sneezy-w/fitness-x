@@ -56,7 +56,7 @@ const Bookings = () => {
   const fetchBookings = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/bookings/member");
+      const response = await api.get("/bookings/member/all");
       setBookings(response.data);
     } catch (error) {
       console.error("Error fetching bookings:", error);

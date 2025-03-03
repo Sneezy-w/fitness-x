@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Calendar, momentLocalizer, Views, SlotInfo } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -58,7 +58,7 @@ interface ToolbarProps {
 }
 
 const Classes = () => {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [loading, setLoading] = useState(true);
@@ -88,10 +88,7 @@ const Classes = () => {
     });
   }, [events, selectedDate]);
 
-  useEffect(() => {
-    fetchAvailableClasses();
-    fetchMembershipInfo();
-  }, []);
+  
 
   const fetchMembershipInfo = async () => {
     try {
@@ -128,7 +125,7 @@ const Classes = () => {
     }
   };
 
-  const fetchAvailableClasses = async () => {
+  const fetchAvailableClasses = useCallback(async () => {
     try {
       setLoading(true);
       const response = await api.get("/schedules/public/upcoming");
@@ -163,7 +160,14 @@ const Classes = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!authLoading) {
+      fetchAvailableClasses();
+      fetchMembershipInfo();
+    }
+  }, [ authLoading]);
 
   const handleSelectEvent = (event: CalendarEvent) => {
     setSelectedEvent(event.resource);

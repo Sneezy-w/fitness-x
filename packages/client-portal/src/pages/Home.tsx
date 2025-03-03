@@ -65,7 +65,7 @@ const Home = () => {
   const fetchUpcomingClasses = async () => {
     try {
       setLoading((prev) => ({ ...prev, classes: true }));
-      const response = await api.get("/schedules/upcoming");
+      const response = await api.get("/schedules/public/upcoming");
       setUpcomingClasses(response.data);
     } catch (error) {
       console.error("Error fetching upcoming classes:", error);
