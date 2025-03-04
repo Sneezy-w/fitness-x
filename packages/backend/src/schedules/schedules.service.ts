@@ -12,6 +12,7 @@ import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { ClassesService } from '../classes/classes.service';
 import { TrainersService } from '../trainers/trainers.service';
 import { ApiException } from 'src/common/exceptions/api.exception';
+import { Booking } from '../bookings/entities/booking.entity';
 
 @Injectable()
 export class SchedulesService {
@@ -119,8 +120,8 @@ export class SchedulesService {
 
   async findByTrainerId(trainerId: number): Promise<Schedule[]> {
     return this.scheduleRepository.find({
-      where: { trainer_id: trainerId },
-      relations: ['class', 'trainer', 'bookings'],
+      where: { trainer_id: trainerId, is_cancelled: false },
+      relations: ['class', 'trainer', 'bookings', 'bookings.member'],
       order: {
         date: 'DESC',
         start_time: 'ASC',
@@ -343,30 +344,19 @@ export class SchedulesService {
     };
   }
 
-  async markAttendance(
+  async getBookingsForTrainerSchedule(
     scheduleId: number,
     trainerId: number,
-  ): Promise<Schedule> {
+  ): Promise<Booking[]> {
     const schedule = await this.findOne(scheduleId);
-
-    console.log(schedule);
 
     // Verify that the trainer owns this schedule
     if (schedule.trainer_id != trainerId) {
       throw new ApiException(
-        'You can only mark attendance for your own classes',
+        'You can only access bookings for your own classes',
       );
     }
 
-    // Check if the class date is in the past
-    const classDateTime = new Date(`${schedule.date}T${schedule.end_time}`);
-    if (new Date() < classDateTime) {
-      throw new ApiException(
-        'Cannot mark attendance for a class that has not ended yet',
-      );
-    }
-
-    schedule.attendance_marked = true;
-    return this.scheduleRepository.save(schedule);
+    return schedule.bookings;
   }
 }

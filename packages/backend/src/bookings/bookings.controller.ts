@@ -177,9 +177,9 @@ export class BookingsController {
 
   @Patch(':id/mark-attended')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.TRAINER)
+  @Roles(Role.TRAINER)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Mark a booking as attended (admin or trainer)' })
+  @ApiOperation({ summary: 'Mark a booking as attended (trainer only)' })
   @ApiResponse({ status: 200, description: 'Booking marked as attended' })
   @ApiResponse({ status: 404, description: 'Booking not found' })
   markAttended(@Param('id') id: string) {

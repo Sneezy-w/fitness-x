@@ -8,6 +8,9 @@ import {
   FiUsers,
   FiMapPin,
   FiCheckCircle,
+  FiUserCheck,
+  FiUserX,
+  FiUser,
 } from "react-icons/fi";
 import api from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
@@ -28,6 +31,7 @@ interface ClassEvent {
   totalBookings: number;
   attendanceMarked: boolean;
   resource?: Record<string, any>;
+  bookings?: BookingDetail[];
 }
 
 interface ClassDetail {
@@ -43,6 +47,16 @@ interface ClassDetail {
   attendanceMarked: boolean;
 }
 
+interface BookingDetail {
+  id: number;
+  //member_name: string;
+  is_attended: boolean;
+  member: {
+    full_name: string;
+  };
+  member_id: number;
+}
+
 interface ToolbarProps {
   date: Date;
   onNavigate: (action: "PREV" | "NEXT" | "TODAY") => void;
@@ -55,6 +69,7 @@ const Classes = () => {
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<ClassDetail | null>(null);
   const [showEventDetails, setShowEventDetails] = useState(false);
+  const [bookings, setBookings] = useState<BookingDetail[]>([]);
 
   // Filter events for the selected date
   const eventsForSelectedDate = useMemo(() => {
@@ -110,7 +125,7 @@ const Classes = () => {
     }
   };
 
-  const handleSelectEvent = (event: ClassEvent) => {
+  const handleSelectEvent = async (event: ClassEvent) => {
     // Format the event details for display
     const classDetail: ClassDetail = {
       id: event.id,
@@ -126,6 +141,16 @@ const Classes = () => {
     };
 
     setSelectedEvent(classDetail);
+
+    try {
+      // Fetch bookings for this schedule
+      const response = await api.get(`/schedules/${event.id}/bookings`);
+      setBookings(response.data);
+    } catch (error) {
+      console.error("Error fetching bookings:", error);
+      toast.error("Failed to load bookings. Please try again.");
+    }
+
     setShowEventDetails(true);
   };
 
@@ -138,20 +163,21 @@ const Classes = () => {
     setSelectedEvent(null);
   };
 
-  const handleMarkAttendance = async () => {
-    if (!selectedEvent) return;
-
+  const markBookingAttendance = async (bookingId: number) => {
     try {
-      // Call the API to mark attendance
-      await api.post(`/schedules/trainer/self/mark-attendance/${selectedEvent.id}`);
+      // Call the API to mark attendance for a specific booking
+      await api.patch(`/bookings/${bookingId}/mark-attended`);
       toast.success("Attendance marked successfully");
 
-      // Refresh the data
-      await fetchTrainerClasses();
-      setShowEventDetails(false);
+      // Update the local booking state
+      setBookings((prevBookings) =>
+        prevBookings.map((booking) =>
+          booking.id == bookingId ? { ...booking, is_attended: true } : booking
+        )
+      );
     } catch (error) {
       console.error("Error marking attendance:", error);
-      //toast.error("Failed to mark attendance. Please try again.");
+      toast.error("Failed to mark attendance. Please try again.");
     }
   };
 
@@ -379,24 +405,49 @@ const Classes = () => {
                   Attendance
                 </h3>
                 <p className="text-gray-300 mb-4">
-                  {selectedEvent.attendanceMarked
-                    ? "Attendance has been marked for this class."
-                    : "Mark attendance for this class after completion."}
+                  Mark attendance for each member who attended this class.
                 </p>
-                <button
-                  className={`flex items-center ${
-                    selectedEvent.attendanceMarked
-                      ? "bg-green-700 cursor-not-allowed"
-                      : "bg-primary hover:bg-accent"
-                  } text-white py-2 px-4 rounded-md transition`}
-                  onClick={handleMarkAttendance}
-                  disabled={selectedEvent.attendanceMarked}
-                >
-                  <FiCheckCircle className="mr-2" />
-                  {selectedEvent.attendanceMarked
-                    ? "Attendance Marked"
-                    : "Mark Attendance"}
-                </button>
+
+                {bookings.length === 0 ? (
+                  <p className="text-gray-400">No bookings for this class.</p>
+                ) : (
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {bookings.map((booking) => (
+                      <div
+                        key={booking.id}
+                        className="flex items-center justify-between bg-secondary/50 p-3 rounded-md"
+                      >
+                        <div className="flex items-center">
+                          <div className="bg-primary/20 p-2 rounded-full mr-3">
+                            <FiUser className="text-primary" size={16} />
+                          </div>
+                          <span className="text-white">
+                            {booking.member.full_name}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => markBookingAttendance(booking.id)}
+                          disabled={booking.is_attended}
+                          className={`flex items-center ${
+                            booking.is_attended
+                              ? "bg-green-700 cursor-not-allowed"
+                              : "bg-primary hover:bg-accent"
+                          } text-white py-1 px-3 rounded-md transition text-sm`}
+                        >
+                          {booking.is_attended ? (
+                            <>
+                              <FiUserCheck className="mr-1" /> Present
+                            </>
+                          ) : (
+                            <>
+                              <FiUserX className="mr-1" /> Mark Present
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="flex justify-end">

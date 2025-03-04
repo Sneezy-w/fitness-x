@@ -28,7 +28,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../auth/enums/role.enum';
 import { Auth0AuthGuard } from 'src/auth/guards/auth0-auth.guard';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { Request } from 'express';
+//import { Request } from 'express';
 @ApiTags('schedules')
 @Controller('schedules')
 export class SchedulesController {
@@ -205,15 +205,24 @@ export class SchedulesController {
     return this.schedulesService.findByTrainerId(currentUser.id);
   }
 
-  @Post('trainer/self/mark-attendance/:id')
+  @Get(':id/bookings')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.TRAINER)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Mark attendance for a schedule (trainer only)' })
-  @ApiResponse({ status: 200, description: 'Attendance marked successfully' })
+  @ApiOperation({ summary: 'Get all bookings for a specific schedule' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of bookings for the schedule',
+  })
   @ApiResponse({ status: 404, description: 'Schedule not found' })
-  async markAttendance(@Param('id') id: string, @Req() request: Request) {
+  async getScheduleBookings(
+    @Param('id') id: string,
+    @Req() request: Express.Request,
+  ) {
     const currentUser = request.user as Express.MemberTrainerUser;
-    return this.schedulesService.markAttendance(+id, currentUser.id);
+    return this.schedulesService.getBookingsForTrainerSchedule(
+      +id,
+      currentUser.id,
+    );
   }
 }
