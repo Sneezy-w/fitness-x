@@ -13,6 +13,7 @@ import { MembershipTypesModule } from './membership-types/membership-types.modul
 import { MembershipSubscriptionsModule } from './membership-subscriptions/membership-subscriptions.module';
 import { FreeClassAllocationsModule } from './free-class-allocations/free-class-allocations.module';
 import { PaymentsModule } from './payments/payments.module';
+import { StatisticsModule } from './statistics/statistics.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { PaymentsModule } from './payments/payments.module';
     MembershipSubscriptionsModule,
     FreeClassAllocationsModule,
     PaymentsModule,
+    StatisticsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
