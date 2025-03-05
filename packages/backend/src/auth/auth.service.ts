@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { MembersService } from '../members/members.service';
 import { TrainersService } from '../trainers/trainers.service';
 import { Role } from './enums/role.enum';
+import { ApiException } from 'src/common/exceptions/api.exception';
 
 @Injectable()
 export class AuthService {
@@ -17,7 +18,7 @@ export class AuthService {
     if (member) {
       return { ...member, role: Role.MEMBER };
     }
-    return null;
+    throw new ApiException('Invalid credentials');
   }
 
   async validateTrainer(email: string, password: string) {
@@ -25,7 +26,7 @@ export class AuthService {
     if (trainer) {
       return { ...trainer, role: Role.TRAINER };
     }
-    return null;
+    throw new ApiException('Invalid credentials');
   }
 
   generateJwtToken(user: {
