@@ -25,91 +25,91 @@ api.interceptors.request.use(
 
 // Mock response data for development/fallback
 const mockResponses: Record<string, any> = {
-  '/bookings/member': [
+  "/bookings/member": [
     {
       id: 1,
       schedule_id: 1,
       member_id: 1,
-      status: 'confirmed',
-      attendance_status: 'pending',
-      created_at: '2023-03-01T00:00:00.000Z',
-      updated_at: '2023-03-01T00:00:00.000Z',
+      status: "confirmed",
+      attendance_status: "pending",
+      created_at: "2023-03-01T00:00:00.000Z",
+      updated_at: "2023-03-01T00:00:00.000Z",
       schedule: {
         id: 1,
         class_id: 1,
         trainer_id: 1,
-        date: '2023-03-15',
-        start_time: '10:00',
-        end_time: '11:00',
+        date: "2023-03-15",
+        start_time: "10:00",
+        end_time: "11:00",
         capacity: 20,
         is_cancelled: false,
-        created_at: '2023-03-01T00:00:00.000Z',
-        updated_at: '2023-03-01T00:00:00.000Z',
+        created_at: "2023-03-01T00:00:00.000Z",
+        updated_at: "2023-03-01T00:00:00.000Z",
         class: {
           id: 1,
-          name: 'Yoga Class',
-          description: 'Relaxing yoga session',
-          category: 'Yoga Studio',
-          duration_minutes: 60
+          name: "Yoga Class",
+          description: "Relaxing yoga session",
+          category: "Yoga Studio",
+          duration_minutes: 60,
         },
         trainer: {
           id: 1,
-          first_name: 'John',
-          last_name: 'Doe'
-        }
-      }
-    }
+          first_name: "John",
+          last_name: "Doe",
+        },
+      },
+    },
   ],
-  '/schedules/available': [
+  "/schedules/available": [
     {
       id: 1,
       class_id: 1,
       trainer_id: 1,
-      date: '2023-03-15',
-      start_time: '10:00',
-      end_time: '11:00',
+      date: "2023-03-15",
+      start_time: "10:00",
+      end_time: "11:00",
       capacity: 20,
       is_cancelled: false,
-      created_at: '2023-03-01T00:00:00.000Z',
-      updated_at: '2023-03-01T00:00:00.000Z',
+      created_at: "2023-03-01T00:00:00.000Z",
+      updated_at: "2023-03-01T00:00:00.000Z",
       isBooked: false,
       class: {
         id: 1,
-        name: 'Yoga Class',
-        description: 'Relaxing yoga session',
-        category: 'Yoga Studio',
-        duration_minutes: 60
+        name: "Yoga Class",
+        description: "Relaxing yoga session",
+        category: "Yoga Studio",
+        duration_minutes: 60,
       },
       trainer: {
         id: 1,
-        first_name: 'John',
-        last_name: 'Doe'
+        first_name: "John",
+        last_name: "Doe",
       },
-      bookings: []
-    }
+      bookings: [],
+    },
   ],
-  '/membership-subscriptions/member/current': {
+  "/membership-subscriptions/member/current": {
     id: 1,
     member_id: 1,
     membership_type_id: 1,
-    start_date: '2023-03-01',
-    end_date: '2023-04-01',
-    status: 'active',
-    payment_status: 'paid',
+    start_date: "2023-03-01",
+    end_date: "2023-04-01",
+    status: "active",
+    payment_status: "paid",
     remainingClasses: 10,
-    created_at: '2023-03-01T00:00:00.000Z',
-    updated_at: '2023-03-01T00:00:00.000Z'
+    created_at: "2023-03-01T00:00:00.000Z",
+    updated_at: "2023-03-01T00:00:00.000Z",
   },
-  '/free-class-allocations/member/current/remaining': {
-    remainingClasses: 2
-  }
+  "/free-class-allocations/member/current/remaining": {
+    remainingClasses: 2,
+  },
 };
 
 // Enhanced response interceptor with mock fallbacks
 api.interceptors.response.use(
   (response) => {
     // NestJS typically returns data directly, no success field
-        //console.log("response", response);
+    //console.log("response", response);
     //console.log("response", response);
     if (!response.data?.success) {
       toast.error(response.data.errorMessage);
@@ -121,12 +121,14 @@ api.interceptors.response.use(
   },
   (error) => {
     const { response, config } = error;
-    
+
     // If we're in a development environment and have a mock for this endpoint, return it
     if (import.meta.env.DEV && config?.url) {
       const mockData = mockResponses[config.url as string];
       if (mockData) {
-        console.warn(`Using mock data for ${config.url} as backend request failed`);
+        console.warn(
+          `Using mock data for ${config.url} as backend request failed`
+        );
         return mockData;
       }
     }
@@ -145,7 +147,7 @@ api.interceptors.response.use(
       // Handle other errors
       else {
         const errorMessage =
-          response.data?.message ||
+          response.data?.errorMessage ||
           "An error occurred. Please try again later.";
         toast.error(errorMessage);
       }
