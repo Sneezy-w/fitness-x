@@ -5,6 +5,7 @@ import { Member } from '../members/entities/member.entity';
 import { Booking } from '../bookings/entities/booking.entity';
 import { Schedule } from '../schedules/entities/schedule.entity';
 import { Trainer } from '../trainers/entities/trainer.entity';
+import { Class } from '../classes/entities/class.entity';
 
 @Injectable()
 export class StatisticsService {
@@ -17,6 +18,8 @@ export class StatisticsService {
     private scheduleRepository: Repository<Schedule>,
     @InjectRepository(Trainer)
     private trainerRepository: Repository<Trainer>,
+    @InjectRepository(Class)
+    private classRepository: Repository<Class>,
   ) {}
 
   async getMemberStatistics() {
@@ -156,5 +159,61 @@ export class StatisticsService {
       approvedTrainers,
       pendingTrainers: totalTrainers - approvedTrainers,
     };
+  }
+
+  async getDashboardStatistics() {
+    // Existing implementation...
+  }
+
+  async getAttendanceDataForExport(): Promise<string> {
+    // Get all bookings with related data
+    const bookings = await this.bookingRepository.find({
+      relations: ['member', 'schedule', 'schedule.class', 'schedule.trainer'],
+      order: {
+        booked_at: 'DESC',
+      },
+    });
+
+    // Create CSV headers
+    let csv = 'Date,Time,Class Name,Trainer,Member Name,Member Email,Status\n';
+
+    // Add data rows
+    for (const booking of bookings) {
+      const date = new Date(booking.schedule.date).toLocaleDateString();
+      const time = `${booking.schedule.start_time} - ${booking.schedule.end_time}`;
+      const className = booking.schedule.class.name;
+      const trainerName = booking.schedule.trainer.full_name;
+      const memberName = booking.member.full_name;
+      const memberEmail = booking.member.email;
+      const status = booking.is_attended ? 'Attended' : 'Not Attended';
+
+      // Escape any commas in string fields
+      const escapedRow = [
+        date,
+        time,
+        this.escapeCsvValue(className),
+        this.escapeCsvValue(trainerName),
+        this.escapeCsvValue(memberName),
+        this.escapeCsvValue(memberEmail),
+        status,
+      ].join(',');
+
+      csv += escapedRow + '\n';
+    }
+
+    return csv;
+  }
+
+  // Helper function to escape CSV values
+  private escapeCsvValue(value: string): string {
+    // If value contains commas, quotes, or newlines, wrap it in quotes
+    if (
+      value &&
+      (value.includes(',') || value.includes('"') || value.includes('\n'))
+    ) {
+      // Double up any quotes within the value
+      return `"${value.replace(/"/g, '""')}"`;
+    }
+    return value;
   }
 }

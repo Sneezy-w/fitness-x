@@ -3,6 +3,7 @@ import {
   CalendarOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
+  DownloadOutlined,
   LineChartOutlined,
   ScheduleOutlined,
   TeamOutlined,
@@ -12,9 +13,11 @@ import { PageContainer } from '@ant-design/pro-components';
 import { useRequest } from '@umijs/max';
 import {
   Alert,
+  Button,
   Card,
   Col,
   Divider,
+  message,
   Progress,
   Row,
   Spin,
@@ -27,6 +30,50 @@ const { Title, Text } = Typography;
 
 const DashboardPage: React.FC = () => {
   const { data, error, loading } = useRequest('/api/statistics/dashboard');
+
+  const handleExportAttendance = async () => {
+    try {
+      const response = await fetch('/api/statistics/export-attendance', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          // Include authorization if needed
+          // 'Authorization': `Bearer ${token}`
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to export attendance data');
+      }
+
+      // Get the blob from the response
+      const blob = await response.blob();
+
+      // Create a download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+
+      // Get current date for filename
+      const today = new Date();
+      const date = today.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+
+      link.setAttribute('download', `attendance-report-${date}.csv`);
+      document.body.appendChild(link);
+      link.click();
+
+      // Clean up
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      message.success('Attendance data exported successfully');
+    } catch (error) {
+      console.error('Error exporting attendance data:', error);
+      message.error(
+        'Failed to export attendance data. Please try again later.',
+      );
+    }
+  };
 
   if (loading) {
     return (
@@ -126,7 +173,18 @@ const DashboardPage: React.FC = () => {
           </Col>
         </Row>
 
-        <Divider orientation="left">Attendance Analysis</Divider>
+        <Divider orientation="left">
+          Attendance Analysis
+          <Button
+            type="primary"
+            icon={<DownloadOutlined />}
+            size="small"
+            style={{ marginLeft: 16 }}
+            onClick={handleExportAttendance}
+          >
+            Export Attendance
+          </Button>
+        </Divider>
 
         <Row gutter={[16, 16]}>
           <Col xs={24} lg={12}>
