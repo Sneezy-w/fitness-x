@@ -11,7 +11,7 @@ import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { ClassesService } from '../classes/classes.service';
 import { TrainersService } from '../trainers/trainers.service';
-import { ApiException } from 'src/common/exceptions/api.exception';
+import { ApiException } from '../common/exceptions/api.exception';
 import { Booking } from '../bookings/entities/booking.entity';
 
 @Injectable()

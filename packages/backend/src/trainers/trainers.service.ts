@@ -9,7 +9,7 @@ import * as bcrypt from 'bcrypt';
 import { Trainer } from './entities/trainer.entity';
 import { CreateTrainerDto } from './dto/create-trainer.dto';
 import { UpdateTrainerDto } from './dto/update-trainer.dto';
-import { ApiException } from 'src/common/exceptions/api.exception';
+import { ApiException } from '../common/exceptions/api.exception';
 import { UpdateTrainerProfileDto } from './dto/update-trainer-profile.dto';
 
 @Injectable()

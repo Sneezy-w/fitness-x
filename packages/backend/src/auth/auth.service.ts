@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { MembersService } from '../members/members.service';
 import { TrainersService } from '../trainers/trainers.service';
 import { Role } from './enums/role.enum';
-import { ApiException } from 'src/common/exceptions/api.exception';
+import { ApiException } from '../common/exceptions/api.exception';
 
 @Injectable()
 export class AuthService {
