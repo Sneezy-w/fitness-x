@@ -55,7 +55,6 @@ export class Auth0AuthGuard implements CanActivate {
         auth({
           audience: this.configService.get('AUTH0_AUDIENCE', ''),
           issuerBaseURL: this.configService.get('AUTH0_ISSUER_BASE_URL', ''),
-          //secret: this.configService.get('AUTH0_SECRET', ''),
         }),
       );
       await validateAccessToken(request, response);

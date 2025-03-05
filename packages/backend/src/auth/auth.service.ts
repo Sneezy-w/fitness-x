@@ -13,6 +13,13 @@ export class AuthService {
     private trainersService: TrainersService,
   ) {}
 
+  /**
+   * Validates a member's credentials and returns the member if valid.
+   * @param email The member's email
+   * @param password The member's password
+   * @returns The member with role information
+   * @throws ApiException if credentials are invalid
+   */
   async validateMember(email: string, password: string) {
     const member = await this.membersService.validateMember(email, password);
     if (member) {
