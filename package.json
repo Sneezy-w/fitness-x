@@ -6,6 +6,9 @@
     "start:backend": "pnpm run --filter backend start:dev",
     "start:client": "pnpm run --filter client-portal dev",
     "start:admin": "pnpm run --filter admin-portal dev",
+    "build:backend": "pnpm run --filter backend build",
+    "build:client": "pnpm run --filter client-portal build",
+    "build:admin": "pnpm run --filter admin-portal build",
     "build": "pnpm run --recursive build",
     "test": "pnpm run --recursive test"
   },
