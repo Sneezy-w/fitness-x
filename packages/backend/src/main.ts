@@ -22,7 +22,13 @@ async function bootstrap() {
   );
 
   // Enable CORS for frontend applications
-  app.enableCors();
+  app.enableCors({
+    origin:
+      process.env.NODE_ENV === 'production'
+        ? ([process.env.CLIENT_URL, process.env.ADMIN_URL] as string[])
+        : '*',
+    //credentials: true,
+  });
 
   // Use Helmet for security
   app.use(helmet());
