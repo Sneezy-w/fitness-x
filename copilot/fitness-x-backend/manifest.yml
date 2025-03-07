@@ -65,6 +65,7 @@ network:
 variables:
   LOG_LEVEL: info
   NODE_ENV: production
+  PORT: 3000
   # Database Configuration
   #DB_SYNCHRONIZE: true
 
@@ -85,7 +86,6 @@ variables:
   #CLIENT_URL: https://client.fitness-x.studio
 
   # Server Configuration
-  PORT: 3000
 
 secrets:
   DB_SECRET:
