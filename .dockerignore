@@ -20,3 +20,6 @@ nodemon.json
 *.md
 
 *.example
+
+# Copilot
+copilot

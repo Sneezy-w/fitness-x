@@ -15,6 +15,14 @@ import { FreeClassAllocationsModule } from './free-class-allocations/free-class-
 import { PaymentsModule } from './payments/payments.module';
 import { StatisticsModule } from './statistics/statistics.module';
 
+type DBSecret = {
+  host: string;
+  port: number;
+  username: string;
+  password: string;
+  dbname: string;
+};
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -24,20 +32,36 @@ import { StatisticsModule } from './statistics/statistics.module';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'mysql',
-        host: configService.get('DB_HOST', 'localhost'),
-        port: configService.get<number>('DB_PORT', 3306),
-        username: configService.get('DB_USERNAME', 'root'),
-        password: configService.get('DB_PASSWORD', ''),
-        database: configService.get('DB_DATABASE', 'fitness_x'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: configService.get('DB_SYNCHRONIZE', 'false') === 'true',
-        ssl: {
-          rejectUnauthorized:
-            configService.get('DB_REJECT_UNAUTHORIZED', 'false') === 'true',
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        //console.log(configService.get('DB_HOST', 'localhost'));
+        const db_secret = configService.get<string>('DB_SECRET', '{}');
+        const db_secret_json = JSON.parse(db_secret) as DBSecret;
+        const db_host =
+          db_secret_json.host || configService.get('DB_HOST', 'localhost');
+        const db_port =
+          db_secret_json.port || configService.get<number>('DB_PORT', 3306);
+        const db_username =
+          db_secret_json.username || configService.get('DB_USERNAME', 'root');
+        const db_password =
+          db_secret_json.password || configService.get('DB_PASSWORD', '');
+        const db_dbname =
+          db_secret_json.dbname ||
+          configService.get('DB_DATABASE', 'fitness_x');
+        return {
+          type: 'mysql',
+          host: db_host,
+          port: db_port,
+          username: db_username,
+          password: db_password,
+          database: db_dbname,
+          entities: [__dirname + '/**/*.entity{.ts,.js}'],
+          synchronize: configService.get('DB_SYNCHRONIZE', 'false') === 'true',
+          ssl: {
+            rejectUnauthorized:
+              configService.get('DB_REJECT_UNAUTHORIZED', 'false') === 'true',
+          },
+        };
+      },
     }),
     MembersModule,
     TrainersModule,
