@@ -19,6 +19,7 @@ import { StatisticsModule } from './statistics/statistics.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      ignoreEnvFile: process.env.NODE_ENV === 'production',
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -32,6 +33,10 @@ import { StatisticsModule } from './statistics/statistics.module';
         database: configService.get('DB_DATABASE', 'fitness_x'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         synchronize: configService.get('DB_SYNCHRONIZE', 'false') === 'true',
+        ssl: {
+          rejectUnauthorized:
+            configService.get('DB_REJECT_UNAUTHORIZED', 'false') === 'true',
+        },
       }),
     }),
     MembersModule,
