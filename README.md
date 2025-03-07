@@ -2,7 +2,7 @@
 
 ## Overview
 
-Fitness X is a fitness management platform built as a monorepo containing three main applications:
+Fitness X is a fitness management platform built as a monorepo containing three main applications 2:
 
 - Backend API (NestJS)
 - Client Portal (React/Vite)
