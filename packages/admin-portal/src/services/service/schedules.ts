@@ -4,7 +4,7 @@ import { request } from '@umijs/max';
  * Get all schedules
  */
 export async function getSchedules() {
-  return request<API.R<API.Service.Schedule[]>>('/api/schedules', {
+  return request<API.R<API.Service.Schedule[]>>('/schedules', {
     method: 'GET',
   });
 }
@@ -13,7 +13,7 @@ export async function getSchedules() {
  * Get schedule by ID
  */
 export async function getScheduleById(id: number) {
-  return request<API.R<API.Service.Schedule>>(`/api/schedules/${id}`, {
+  return request<API.R<API.Service.Schedule>>(`/schedules/${id}`, {
     method: 'GET',
   });
 }
@@ -22,7 +22,7 @@ export async function getScheduleById(id: number) {
  * Create a new schedule
  */
 export async function createSchedule(data: API.Service.CreateScheduleRequest) {
-  return request<API.R<API.Service.Schedule>>('/api/schedules', {
+  return request<API.R<API.Service.Schedule>>('/schedules', {
     method: 'POST',
     data,
   });
@@ -35,7 +35,7 @@ export async function updateSchedule(
   id: number,
   data: API.Service.UpdateScheduleRequest,
 ) {
-  return request<API.R<API.Service.Schedule>>(`/api/schedules/${id}`, {
+  return request<API.R<API.Service.Schedule>>(`/schedules/${id}`, {
     method: 'PATCH',
     data,
   });
@@ -45,23 +45,20 @@ export async function updateSchedule(
  * Delete a schedule
  */
 export async function deleteSchedule(id: number) {
-  return request<API.R<void>>(`/api/schedules/${id}`, {
+  return request<API.R<void>>(`/schedules/${id}`, {
     method: 'DELETE',
   });
 }
 
 /** Get upcoming schedules */
 export async function getUpcomingSchedules(options?: Record<string, any>) {
-  return request<API.R<API.Service.Schedule[]>>(
-    '/api/schedules/public/upcoming',
-    {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      ...(options || {}),
+  return request<API.R<API.Service.Schedule[]>>('/schedules/public/upcoming', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
     },
-  );
+    ...(options || {}),
+  });
 }
 
 /** Get schedules by date range */
@@ -71,7 +68,7 @@ export async function getSchedulesByDateRange(
   options?: Record<string, any>,
 ) {
   return request<API.R<API.Service.Schedule[]>>(
-    `/api/schedules/range?startDate=${startDate}&endDate=${endDate}`,
+    `/schedules/range?startDate=${startDate}&endDate=${endDate}`,
     {
       method: 'GET',
       headers: {
@@ -87,16 +84,13 @@ export async function getSchedulesByClassId(
   classId: number,
   options?: Record<string, any>,
 ) {
-  return request<API.R<API.Service.Schedule[]>>(
-    `/api/schedules/class/${classId}`,
-    {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      ...(options || {}),
+  return request<API.R<API.Service.Schedule[]>>(`/schedules/class/${classId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
     },
-  );
+    ...(options || {}),
+  });
 }
 
 /** Get schedules by trainer ID */
@@ -105,7 +99,7 @@ export async function getSchedulesByTrainerId(
   options?: Record<string, any>,
 ) {
   return request<API.R<API.Service.Schedule[]>>(
-    `/api/schedules/trainer/${trainerId}`,
+    `/schedules/trainer/${trainerId}`,
     {
       method: 'GET',
       headers: {
@@ -118,7 +112,7 @@ export async function getSchedulesByTrainerId(
 
 /** Cancel a schedule (admin only) */
 export async function cancelSchedule(id: number) {
-  return request<API.R<API.Service.Schedule>>(`/api/schedules/${id}/cancel`, {
+  return request<API.R<API.Service.Schedule>>(`/schedules/${id}/cancel`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',

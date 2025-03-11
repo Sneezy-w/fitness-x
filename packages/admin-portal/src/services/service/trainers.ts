@@ -4,7 +4,7 @@ import { request } from '@umijs/max';
  * Get all trainers
  */
 export async function getTrainers() {
-  return request<API.R<API.Service.Trainer[]>>('/api/trainers', {
+  return request<API.R<API.Service.Trainer[]>>('/trainers', {
     method: 'GET',
   });
 }
@@ -13,7 +13,7 @@ export async function getTrainers() {
  * Get trainer by ID
  */
 export async function getTrainerById(id: number) {
-  return request<API.R<API.Service.Trainer>>(`/api/trainers/${id}`, {
+  return request<API.R<API.Service.Trainer>>(`/trainers/${id}`, {
     method: 'GET',
   });
 }
@@ -22,7 +22,7 @@ export async function getTrainerById(id: number) {
  * Create a new trainer
  */
 export async function createTrainer(data: API.Service.CreateTrainerRequest) {
-  return request<API.R<API.Service.Trainer>>('/api/trainers', {
+  return request<API.R<API.Service.Trainer>>('/trainers', {
     method: 'POST',
     data,
   });
@@ -35,7 +35,7 @@ export async function updateTrainer(
   id: number,
   data: API.Service.UpdateTrainerRequest,
 ) {
-  return request<API.R<API.Service.Trainer>>(`/api/trainers/${id}`, {
+  return request<API.R<API.Service.Trainer>>(`/trainers/${id}`, {
     method: 'PATCH',
     data,
   });
@@ -45,7 +45,7 @@ export async function updateTrainer(
  * Delete a trainer
  */
 export async function deleteTrainer(id: number) {
-  return request<API.R<void>>(`/api/trainers/${id}`, {
+  return request<API.R<void>>(`/trainers/${id}`, {
     method: 'DELETE',
   });
 }
@@ -54,7 +54,7 @@ export async function deleteTrainer(id: number) {
  * Approve a trainer
  */
 export async function approveTrainer(id: number) {
-  return request<API.R<API.Service.Trainer>>(`/api/trainers/${id}/approve`, {
+  return request<API.R<API.Service.Trainer>>(`/trainers/${id}/approve`, {
     method: 'PATCH',
   });
 }

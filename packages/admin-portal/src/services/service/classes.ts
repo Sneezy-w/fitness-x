@@ -2,7 +2,7 @@ import { request } from '@umijs/max';
 
 /** Get all active classes */
 export async function getClasses(options?: Record<string, any>) {
-  return request<API.R<API.Service.Class[]>>('/api/classes', {
+  return request<API.R<API.Service.Class[]>>('/classes', {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -13,7 +13,7 @@ export async function getClasses(options?: Record<string, any>) {
 
 /** Get all classes including inactive ones (admin only) */
 export async function getAllClasses(options?: Record<string, any>) {
-  return request<API.R<API.Service.Class[]>>('/api/classes/all', {
+  return request<API.R<API.Service.Class[]>>('/classes/all', {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -24,7 +24,7 @@ export async function getAllClasses(options?: Record<string, any>) {
 
 /** Get class by ID */
 export async function getClassById(id: number, options?: Record<string, any>) {
-  return request<API.R<API.Service.Class>>(`/api/classes/${id}`, {
+  return request<API.R<API.Service.Class>>(`/classes/${id}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -35,7 +35,7 @@ export async function getClassById(id: number, options?: Record<string, any>) {
 
 /** Create a new class (admin only) */
 export async function createClass(data: API.Service.CreateClassRequest) {
-  return request<API.R<API.Service.Class>>('/api/classes', {
+  return request<API.R<API.Service.Class>>('/classes', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -49,7 +49,7 @@ export async function updateClass(
   id: number,
   data: API.Service.UpdateClassRequest,
 ) {
-  return request<API.R<API.Service.Class>>(`/api/classes/${id}`, {
+  return request<API.R<API.Service.Class>>(`/classes/${id}`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -60,7 +60,7 @@ export async function updateClass(
 
 /** Deactivate a class (admin only) */
 export async function deactivateClass(id: number) {
-  return request<API.R<API.Service.Class>>(`/api/classes/${id}/deactivate`, {
+  return request<API.R<API.Service.Class>>(`/classes/${id}/deactivate`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -70,7 +70,7 @@ export async function deactivateClass(id: number) {
 
 /** Activate a class (admin only) */
 export async function activateClass(id: number) {
-  return request<API.R<API.Service.Class>>(`/api/classes/${id}/activate`, {
+  return request<API.R<API.Service.Class>>(`/classes/${id}/activate`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',

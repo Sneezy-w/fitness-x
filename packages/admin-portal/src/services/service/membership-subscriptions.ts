@@ -5,7 +5,7 @@ export async function getMembershipSubscriptions(
   options?: Record<string, any>,
 ) {
   return request<API.R<API.Service.MembershipSubscription[]>>(
-    '/api/membership-subscriptions',
+    '/membership-subscriptions',
     {
       method: 'GET',
       headers: {
@@ -22,7 +22,7 @@ export async function getMemberSubscriptions(
   options?: Record<string, any>,
 ) {
   return request<API.R<API.Service.MembershipSubscription[]>>(
-    `/api/membership-subscriptions/member/${memberId}`,
+    `/membership-subscriptions/member/${memberId}`,
     {
       method: 'GET',
       headers: {
@@ -39,7 +39,7 @@ export async function getCurrentMemberSubscription(
   options?: Record<string, any>,
 ) {
   return request<API.R<API.Service.MembershipSubscription>>(
-    `/api/membership-subscriptions/member/${memberId}/current`,
+    `/membership-subscriptions/member/${memberId}/current`,
     {
       method: 'GET',
       headers: {
@@ -56,7 +56,7 @@ export async function getMembershipSubscriptionById(
   options?: Record<string, any>,
 ) {
   return request<API.R<API.Service.MembershipSubscription>>(
-    `/api/membership-subscriptions/${id}`,
+    `/membership-subscriptions/${id}`,
     {
       method: 'GET',
       headers: {
@@ -72,7 +72,7 @@ export async function createMembershipSubscription(
   data: API.Service.CreateMembershipSubscriptionRequest,
 ) {
   return request<API.R<API.Service.MembershipSubscription>>(
-    '/api/membership-subscriptions',
+    '/membership-subscriptions',
     {
       method: 'POST',
       headers: {
@@ -89,7 +89,7 @@ export async function updateMembershipSubscription(
   data: API.Service.UpdateMembershipSubscriptionRequest,
 ) {
   return request<API.R<API.Service.MembershipSubscription>>(
-    `/api/membership-subscriptions/${id}`,
+    `/membership-subscriptions/${id}`,
     {
       method: 'PATCH',
       headers: {
@@ -102,7 +102,7 @@ export async function updateMembershipSubscription(
 
 /** Delete a subscription (admin only) */
 export async function deleteMembershipSubscription(id: number) {
-  return request<API.R<any>>(`/api/membership-subscriptions/${id}`, {
+  return request<API.R<any>>(`/membership-subscriptions/${id}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
@@ -113,7 +113,7 @@ export async function deleteMembershipSubscription(id: number) {
 /** Decrement remaining classes for a subscription */
 export async function decrementSubscriptionClasses(id: number) {
   return request<API.R<API.Service.MembershipSubscription>>(
-    `/api/membership-subscriptions/${id}/decrement-classes`,
+    `/membership-subscriptions/${id}/decrement-classes`,
     {
       method: 'PATCH',
       headers: {

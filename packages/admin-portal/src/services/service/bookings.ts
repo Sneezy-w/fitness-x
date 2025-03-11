@@ -2,7 +2,7 @@ import { request } from '@umijs/max';
 
 /** Get all bookings */
 export async function getBookings(options?: Record<string, any>) {
-  return request<API.R<API.Service.Booking[]>>('/api/bookings', {
+  return request<API.R<API.Service.Booking[]>>('/bookings', {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -16,16 +16,13 @@ export async function getBookingsByMemberId(
   memberId: number,
   options?: Record<string, any>,
 ) {
-  return request<API.R<API.Service.Booking[]>>(
-    `/api/bookings/member/${memberId}`,
-    {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      ...(options || {}),
+  return request<API.R<API.Service.Booking[]>>(`/bookings/member/${memberId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
     },
-  );
+    ...(options || {}),
+  });
 }
 
 /** Get upcoming bookings for a member */
@@ -34,7 +31,7 @@ export async function getMemberUpcomingBookings(
   options?: Record<string, any>,
 ) {
   return request<API.R<API.Service.Booking[]>>(
-    `/api/bookings/member/${memberId}/upcoming`,
+    `/bookings/member/${memberId}/upcoming`,
     {
       method: 'GET',
       headers: {
@@ -51,7 +48,7 @@ export async function getBookingsByScheduleId(
   options?: Record<string, any>,
 ) {
   return request<API.R<API.Service.Booking[]>>(
-    `/api/bookings/schedule/${scheduleId}`,
+    `/bookings/schedule/${scheduleId}`,
     {
       method: 'GET',
       headers: {
@@ -67,7 +64,7 @@ export async function getBookingById(
   id: number,
   options?: Record<string, any>,
 ) {
-  return request<API.R<API.Service.Booking>>(`/api/bookings/${id}`, {
+  return request<API.R<API.Service.Booking>>(`/bookings/${id}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -78,7 +75,7 @@ export async function getBookingById(
 
 /** Create a new booking */
 export async function createBooking(data: API.Service.CreateBookingRequest) {
-  return request<API.R<API.Service.Booking>>('/api/bookings', {
+  return request<API.R<API.Service.Booking>>('/bookings', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -92,7 +89,7 @@ export async function updateBooking(
   id: number,
   data: API.Service.UpdateBookingRequest,
 ) {
-  return request<API.R<API.Service.Booking>>(`/api/bookings/${id}`, {
+  return request<API.R<API.Service.Booking>>(`/bookings/${id}`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -103,7 +100,7 @@ export async function updateBooking(
 
 /** Mark a booking as attended */
 export async function markAttendance(id: number) {
-  return request<API.R<API.Service.Booking>>(`/api/bookings/${id}/attend`, {
+  return request<API.R<API.Service.Booking>>(`/bookings/${id}/attend`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -113,7 +110,7 @@ export async function markAttendance(id: number) {
 
 /** Delete a booking */
 export async function deleteBooking(id: number) {
-  return request<API.R<any>>(`/api/bookings/${id}`, {
+  return request<API.R<any>>(`/bookings/${id}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',

@@ -1,3 +1,4 @@
+import { exportAttendance, getStatistics } from '@/services/service/dashboard';
 import {
   BarChartOutlined,
   CalendarOutlined,
@@ -29,40 +30,29 @@ import React from 'react';
 const { Title, Text } = Typography;
 
 const DashboardPage: React.FC = () => {
-  const { data, error, loading } = useRequest('/api/statistics/dashboard');
+  const { data, error, loading } = useRequest(getStatistics);
 
   const handleExportAttendance = async () => {
     try {
-      const response = await fetch('/api/statistics/export-attendance', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          // Include authorization if needed
-          // 'Authorization': `Bearer ${token}`
-        },
-      });
+      const response = await exportAttendance();
 
-      if (!response.ok) {
-        throw new Error('Failed to export attendance data');
-      }
+      // create a blob from the response
+      const blob = new Blob([response], { type: 'text/csv;charset=utf-8;' });
 
-      // Get the blob from the response
-      const blob = await response.blob();
-
-      // Create a download link
+      // create a download link
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
 
-      // Get current date for filename
+      // get the current date as the filename
       const today = new Date();
-      const date = today.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+      const date = today.toISOString().split('T')[0]; // format: YYYY-MM-DD
 
       link.setAttribute('download', `attendance-report-${date}.csv`);
       document.body.appendChild(link);
       link.click();
 
-      // Clean up
+      // clean up
       link.parentNode?.removeChild(link);
       window.URL.revokeObjectURL(url);
 

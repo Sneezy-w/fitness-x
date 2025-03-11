@@ -91,7 +91,7 @@ export const layout: RunTimeLayoutConfig = ({
 export const request: RequestConfig = {
   ...errorConfig,
   baseURL:
-    process.env.NODE_ENV === 'production' ? process.env.API_BASE_URL : '',
+    process.env.NODE_ENV === 'production' ? process.env.API_BASE_URL : '/api',
 };
 
 // export function rootContainer(container: any) {
