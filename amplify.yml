@@ -1,0 +1,41 @@
+version: 1
+applications:
+  - appRoot: packages/admin-portal
+    frontend:
+      buildPath: / # Run install and build from the monorepo project root
+      phases:
+        preBuild:
+          commands:
+            - corepack enable
+            - pnpm install
+        build:
+          commands:
+            - pnpm run build:admin
+      artifacts:
+        files:
+          - "**/*"
+        discard-paths: yes
+        baseDirectory: packages/admin-portal/dist
+      cache:
+        paths:
+          - "node_modules/**/*"
+
+  - appRoot: packages/client-portal
+    frontend:
+      buildPath: /
+      phases:
+        preBuild:
+          commands:
+            - corepack enable
+            - pnpm install
+        build:
+          commands:
+            - pnpm run build:client
+      artifacts:
+        files:
+          - "**/*"
+        discard-paths: yes
+        baseDirectory: packages/client-portal/dist
+      cache:
+        paths:
+          - "node_modules/**/*"
